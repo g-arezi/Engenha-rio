@@ -335,11 +335,11 @@ $hideTopBar = true; // Adiciona variável para ocultar o top-bar
                                     <td>
                                         <div class="btn-group" role="group">
                                             <button type="button" class="btn btn-success btn-sm" 
-                                                    onclick="approveUser(<?= $user['id'] ?>)">
+                                                    onclick="approveUser('<?= $user['id'] ?>')">
                                                 <i class="fas fa-check text-dark"></i> Aprovar
                                             </button>
                                             <button type="button" class="btn btn-danger btn-sm" 
-                                                    onclick="rejectUser(<?= $user['id'] ?>)">
+                                                    onclick="rejectUser('<?= $user['id'] ?>')">
                                                 <i class="fas fa-times text-dark"></i> Rejeitar
                                             </button>
                                         </div>
@@ -648,7 +648,7 @@ $hideTopBar = true; // Adiciona variável para ocultar o top-bar
 <script>
 function approveUser(userId) {
     if (confirm('Tem certeza que deseja aprovar este usuário?')) {
-        fetch('/admin/users/approve', {
+        fetch(`/admin/users/${userId}/approve`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -673,7 +673,7 @@ function approveUser(userId) {
 
 function rejectUser(userId) {
     if (confirm('Tem certeza que deseja rejeitar este usuário?')) {
-        fetch('/admin/users/reject', {
+        fetch(`/admin/users/${userId}/reject`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -700,13 +700,15 @@ function toggleUserStatus(userId, newStatus) {
     const action = newStatus === 'true' ? 'ativar' : 'desativar';
     
     if (confirm(`Tem certeza que deseja ${action} este usuário?`)) {
-        const formData = new FormData();
-        formData.append('user_id', userId);
-        formData.append('status', newStatus);
-        
-        fetch('/admin/users/toggle-status', {
+        fetch(`/admin/users/${userId}/toggle-status`, {
             method: 'POST',
-            body: formData
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+                user_id: userId,
+                status: newStatus === 'true' 
+            })
         })
         .then(response => response.json())
         .then(data => {
@@ -1177,91 +1179,17 @@ document.addEventListener('DOMContentLoaded', function() {
 </style>
 
 <script>
-// Funções JavaScript para gerenciamento de usuários
-function approveUser(userId) {
-    if (confirm('Tem certeza que deseja aprovar este usuário?')) {
-        fetch('/admin/approve-user', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ user_id: userId })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showAlert('success', data.message);
-                location.reload();
-            } else {
-                showAlert('error', data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Erro:', error);
-            showAlert('error', 'Erro ao aprovar usuário');
-        });
-    }
-}
-
-function rejectUser(userId) {
-    if (confirm('Tem certeza que deseja rejeitar este usuário? Esta ação não pode ser desfeita.')) {
-        fetch('/admin/reject-user', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ user_id: userId })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showAlert('success', data.message);
-                location.reload();
-            } else {
-                showAlert('error', data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Erro:', error);
-            showAlert('error', 'Erro ao rejeitar usuário');
-        });
-    }
-}
-
-function toggleUserStatus(userId, currentStatus) {
-    const action = currentStatus ? 'desativar' : 'ativar';
-    if (confirm(`Tem certeza que deseja ${action} este usuário?`)) {
-        fetch('/admin/toggle-user-status', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ user_id: userId, active: !currentStatus })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showAlert('success', data.message);
-                location.reload();
-            } else {
-                showAlert('error', data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Erro:', error);
-            showAlert('error', 'Erro ao alterar status do usuário');
-        });
-    }
-}
+// Funções JavaScript para gerenciamento de usuários já definidas acima
+// Removendo duplicatas para evitar conflitos
 
 function viewUser(userId) {
-    fetch(`/admin/view-user/${userId}`)
+    fetch(`/admin/users/${userId}/view`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
                 showUserModal(data.user);
             } else {
-                showAlert('error', data.message);
+                showAlert('error', data.error || 'Erro ao carregar dados do usuário');
             }
         })
         .catch(error => {

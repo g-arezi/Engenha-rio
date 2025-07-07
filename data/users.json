@@ -39,8 +39,30 @@
         "role": "cliente",
         "created_at": "2025-07-07 15:41:09",
         "active": true,
-        "approved": false,
-        "updated_at": "2025-07-07 15:41:09",
+        "approved": true,
+        "updated_at": "2025-07-07 16:08:49",
         "id": "686c14c547d77"
+    },
+    "686c1b6e8d3f1": {
+        "name": "Usu\u00e1rio Teste API",
+        "email": "teste.api@example.com",
+        "password": "$2y$10$l2oZ77kF7BFJRCO2gqYkDONlYsIabFfBzQECN3NaQIonLQiA2p0M2",
+        "role": "cliente",
+        "approved": true,
+        "active": true,
+        "created_at": "2025-07-07 21:09:34",
+        "updated_at": "2025-07-07 21:09:34",
+        "id": "686c1b6e8d3f1"
+    },
+    "686c1c7a168a1": {
+        "name": "teste",
+        "email": "testestes@contato.com",
+        "password": "$2y$10$ZNXImDCPRjMMDJhTxECiUuueLloyrHkHEqSDVuvH4YfNcNz6XBwCy",
+        "role": "cliente",
+        "created_at": "2025-07-07 16:14:02",
+        "active": true,
+        "approved": false,
+        "updated_at": "2025-07-07 16:14:02",
+        "id": "686c1c7a168a1"
     }
 }
