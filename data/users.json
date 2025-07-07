@@ -31,5 +31,16 @@
         "created_at": "2025-07-04 19:33:42",
         "updated_at": "2025-07-04 19:33:42",
         "id": "686856c61b572"
+    },
+    "686c14c547d77": {
+        "name": "Teste user",
+        "email": "gabriel.arezi.gsa@gmail.com",
+        "password": "$2y$10$vGUvxiiIg3jXf7m\/7IfZZeE3F88uf0Rui1vY3kyYAENmhfQ8dFDWi",
+        "role": "cliente",
+        "created_at": "2025-07-07 15:41:09",
+        "active": true,
+        "approved": false,
+        "updated_at": "2025-07-07 15:41:09",
+        "id": "686c14c547d77"
     }
 }
