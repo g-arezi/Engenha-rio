@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test JavaScript Console</title>
+    <script>
+        // Test JavaScript fetch directly
+        function testEditUser() {
+            console.log('Testing editUser function...');
+            
+            fetch('/admin/users/analyst_001/edit')
+                .then(response => {
+                    console.log('Response:', response);
+                    console.log('Response status:', response.status);
+                    console.log('Response headers:', response.headers);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('JSON data:', data);
+                    if (data.success) {
+                        console.log('Success! User data:', data.user);
+                    } else {
+                        console.log('Error:', data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                });
+        }
+        
+        // Auto-run test
+        window.onload = function() {
+            console.log('Page loaded. Testing...');
+            testEditUser();
+        };
+    </script>
+</head>
+<body>
+    <h1>JavaScript Test Page</h1>
+    <button onclick="testEditUser()">Test Edit User</button>
+    <p>Check the browser console for output.</p>
+</body>
+</html>

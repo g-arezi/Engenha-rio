@@ -1,0 +1,330 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Histórico do Sistema - Engenha-rio</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .main-content {
+            margin-left: 280px;
+            padding: 20px;
+        }
+        .activity-item {
+            border-left: 3px solid #007bff;
+            padding-left: 15px;
+            margin-bottom: 20px;
+        }
+        .activity-time {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        .activity-user {
+            font-weight: bold;
+            color: #495057;
+        }
+        .activity-action {
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+    
+<!-- Sidebar -->
+<nav class="sidebar position-fixed">
+    <div class="sidebar-header p-3">
+        <h4 class="text-white">
+            <i class="fas fa-building me-2"></i>
+            Engenha-rio
+        </h4>
+        <small class="text-white-50">Painel Administrativo</small>
+    </div>
+    
+    <div class="sidebar-user p-3 border-bottom border-secondary">
+        <div class="d-flex align-items-center">
+            <div class="user-avatar bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" 
+                 style="width: 40px; height: 40px;">
+                <i class="fas fa-user text-white"></i>
+            </div>
+            <div>
+                <div class="text-white font-weight-bold">Administrador</div>
+                <small class="text-white-50">Admin</small>
+            </div>
+        </div>
+    </div>
+    
+    <ul class="nav flex-column p-3">
+        <li class="nav-item">
+            <a class="nav-link text-white " 
+               href="/admin">
+                <i class="fas fa-tachometer-alt me-2"></i>
+                Dashboard
+            </a>
+        </li>
+        
+        <li class="nav-item">
+            <a class="nav-link text-white " 
+               href="/admin/users">
+                <i class="fas fa-users me-2"></i>
+                Usuários
+            </a>
+        </li>
+        
+        <li class="nav-item">
+            <a class="nav-link text-white active" 
+               href="/admin/history">
+                <i class="fas fa-history me-2"></i>
+                Histórico
+            </a>
+        </li>
+        
+        <li class="nav-item">
+            <a class="nav-link text-white " 
+               href="/admin/settings">
+                <i class="fas fa-cog me-2"></i>
+                Configurações
+            </a>
+        </li>
+        
+        <li class="nav-item">
+            <a class="nav-link text-white " 
+               href="/admin/logs">
+                <i class="fas fa-file-alt me-2"></i>
+                Logs
+            </a>
+        </li>
+    </ul>
+    
+    <div class="sidebar-footer p-3 mt-auto">
+        <div class="d-grid gap-2">
+            <a href="/dashboard" class="btn btn-outline-light btn-sm">
+                <i class="fas fa-home me-1"></i>
+                Dashboard Principal
+            </a>
+            <a href="/logout" class="btn btn-outline-danger btn-sm">
+                <i class="fas fa-sign-out-alt me-1"></i>
+                Sair
+            </a>
+        </div>
+    </div>
+</nav>
+
+<style>
+.sidebar {
+    width: 280px;
+    height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar .nav-link {
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    margin-bottom: 5px;
+}
+
+.sidebar .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateX(5px);
+}
+
+.sidebar .nav-link.active {
+    background-color: rgba(255, 255, 255, 0.2);
+    font-weight: bold;
+}
+
+.sidebar-header {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-user {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-footer {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+</style>
+    
+    <div class="main-content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h1><i class="fas fa-history me-2"></i>Histórico do Sistema</h1>
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-primary" onclick="refreshHistory()">
+                                <i class="fas fa-sync-alt me-1"></i>Atualizar
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="exportHistory()">
+                                <i class="fas fa-download me-1"></i>Exportar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Filtros -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Filtros</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label for="filterType" class="form-label">Tipo de Atividade</label>
+                                    <select class="form-select" id="filterType">
+                                        <option value="">Todos</option>
+                                        <option value="login">Login</option>
+                                        <option value="logout">Logout</option>
+                                        <option value="user_create">Usuário Criado</option>
+                                        <option value="user_update">Usuário Atualizado</option>
+                                        <option value="user_delete">Usuário Deletado</option>
+                                        <option value="project_create">Projeto Criado</option>
+                                        <option value="project_update">Projeto Atualizado</option>
+                                        <option value="document_upload">Documento Enviado</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="filterUser" class="form-label">Usuário</label>
+                                    <select class="form-select" id="filterUser">
+                                        <option value="">Todos</option>
+                                                                                    <option value="admin_001">Administrador</option>
+                                                                                    <option value="analyst_001">João Silva</option>
+                                                                                    <option value="client_001">Rafael Edinaldo</option>
+                                                                                    <option value="68681893352fb">Teste Usuario</option>
+                                                                                    <option value="admin_002">Administrador do Sistema</option>
+                                                                                    <option value="user_pending">Usuário Pendente</option>
+                                                                                    <option value="moderator_user">Moderador Sistema</option>
+                                                                                    <option value="6868408378d30">Novo Usuário Teste</option>
+                                                                            </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="filterDate" class="form-label">Data</label>
+                                    <input type="date" class="form-control" id="filterDate">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">&nbsp;</label>
+                                    <div class="d-grid">
+                                        <button type="button" class="btn btn-primary" onclick="applyFilters()">
+                                            <i class="fas fa-filter me-1"></i>Filtrar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Histórico -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Atividades Recentes</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="historyContainer">
+                                                                                                            <div class="activity-item">
+                                            <div class="activity-time">04/07/2025 20:00:00</div>
+                                            <div class="activity-user">Administrador</div>
+                                            <div class="activity-action">Login realizado</div>
+                                                                                            <div class="activity-details text-muted">
+                                                    <small>IP: 127.0.0.1</small>
+                                                </div>
+                                                                                    </div>
+                                                                            <div class="activity-item">
+                                            <div class="activity-time">04/07/2025 19:45:00</div>
+                                            <div class="activity-user">Administrador</div>
+                                            <div class="activity-action">Usuário atualizado</div>
+                                                                                            <div class="activity-details text-muted">
+                                                    <small>Usuário: João Silva</small>
+                                                </div>
+                                                                                    </div>
+                                                                            <div class="activity-item">
+                                            <div class="activity-time">04/07/2025 19:30:00</div>
+                                            <div class="activity-user">João Silva</div>
+                                            <div class="activity-action">Documento enviado</div>
+                                                                                            <div class="activity-details text-muted">
+                                                    <small>Arquivo: projeto_estrutural.pdf</small>
+                                                </div>
+                                                                                    </div>
+                                                                            <div class="activity-item">
+                                            <div class="activity-time">04/07/2025 19:15:00</div>
+                                            <div class="activity-user">Administrador</div>
+                                            <div class="activity-action">Novo usuário criado</div>
+                                                                                            <div class="activity-details text-muted">
+                                                    <small>Usuário: Maria Santos</small>
+                                                </div>
+                                                                                    </div>
+                                                                            <div class="activity-item">
+                                            <div class="activity-time">04/07/2025 18:30:00</div>
+                                            <div class="activity-user">Rafael Edinaldo</div>
+                                            <div class="activity-action">Projeto criado</div>
+                                                                                            <div class="activity-details text-muted">
+                                                    <small>Projeto: Edifício Comercial Downtown</small>
+                                                </div>
+                                                                                    </div>
+                                                                                                </div>
+                            
+                            <!-- Paginação -->
+                            <nav aria-label="Paginação do histórico">
+                                <ul class="pagination justify-content-center">
+                                    <li class="page-item">
+                                        <a class="page-link" href="#" onclick="loadPage(1)">Primeira</a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="#" onclick="loadPage(1)">Anterior</a>
+                                    </li>
+                                    <li class="page-item active">
+                                        <span class="page-link">1</span>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="#" onclick="loadPage(2)">Próxima</a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="#" onclick="loadPage(1)">Última</a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function refreshHistory() {
+            location.reload();
+        }
+        
+        function exportHistory() {
+            window.location.href = '/admin/history/export';
+        }
+        
+        function applyFilters() {
+            const type = document.getElementById('filterType').value;
+            const user = document.getElementById('filterUser').value;
+            const date = document.getElementById('filterDate').value;
+            
+            let url = '/admin/history?';
+            if (type) url += 'type=' + type + '&';
+            if (user) url += 'user=' + user + '&';
+            if (date) url += 'date=' + date + '&';
+            
+            window.location.href = url;
+        }
+        
+        function loadPage(page) {
+            const urlParams = new URLSearchParams(window.location.search);
+            urlParams.set('page', page);
+            window.location.href = '/admin/history?' + urlParams.toString();
+        }
+    </script>
+</body>
+</html>

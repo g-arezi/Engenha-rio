@@ -1,0 +1,14 @@
+{
+    "site_name": "Sistema Engenha-rio",
+    "site_description": "Sistema de Gestão de Projetos de Engenharia",
+    "admin_email": "admin@engenhario.com",
+    "maintenance_mode": false,
+    "user_registration": true,
+    "email_notifications": true,
+    "auto_approve_users": false,
+    "max_file_size": 10,
+    "allowed_file_types": "pdf,doc,docx,jpg,jpeg,png,xls,xlsx,dwg,dxf",
+    "created_at": "2025-07-04 12:00:00",
+    "updated_at": "2025-07-04 12:00:00",
+    "updated_by": "Sistema"
+}

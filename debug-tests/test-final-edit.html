@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste Final - Edição de Usuário</title>
+</head>
+<body>
+    <h1>Teste Final - Edição de Usuário</h1>
+    <button onclick="testEdit()">Testar Edição</button>
+    <div id="result"></div>
+    
+    <script>
+        function testEdit() {
+            fetch('/admin-users-edit.php?id=admin_001')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('result').innerHTML = 
+                        '<h3>Resultado:</h3><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                })
+                .catch(error => {
+                    document.getElementById('result').innerHTML = 
+                        '<h3>Erro:</h3><p>' + error.message + '</p>';
+                });
+        }
+    </script>
+</body>
+</html>

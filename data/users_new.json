@@ -1,0 +1,90 @@
+{
+    "admin_user": {
+        "id": "admin_001",
+        "name": "Administrador",
+        "email": "admin@engenhario.com",
+        "password": "$2y$10$NhuOr9XPqT5tT8SHyoOx\/.K0r36Py9S7ryqzysmQ3feMcYgGvlSiK",
+        "role": "admin",
+        "active": true,
+        "approved": true,
+        "created_at": "2025-01-01 00:00:00",
+        "updated_at": "2025-01-01 00:00:00"
+    },
+    "analyst_user": {
+        "id": "analyst_001",
+        "name": "João Silva",
+        "email": "analista@engenhario.com",
+        "password": "$2y$10$NhuOr9XPqT5tT8SHyoOx\/.K0r36Py9S7ryqzysmQ3feMcYgGvlSiK",
+        "role": "user",
+        "active": true,
+        "approved": true,
+        "created_at": "2025-01-01 00:00:00",
+        "updated_at": "2025-01-01 00:00:00"
+    },
+    "client_user": {
+        "id": "client_001",
+        "name": "Rafael Edinaldo",
+        "email": "cliente@engenhario.com",
+        "password": "$2y$10$NhuOr9XPqT5tT8SHyoOx\/.K0r36Py9S7ryqzysmQ3feMcYgGvlSiK",
+        "role": "user",
+        "active": true,
+        "approved": true,
+        "created_at": "2025-01-01 00:00:00",
+        "updated_at": "2025-01-01 00:00:00"
+    },
+    "68681893352fb": {
+        "name": "Teste Usuario",
+        "email": "teste@exemplo.com",
+        "password": "$2y$10$b\/u\/l4YDAoch.ap4eYVWSu2GvgGw0o2jwUJrhmLQuMDSpPJhWERpC",
+        "role": "user",
+        "created_at": "2025-07-04 15:08:19",
+        "active": true,
+        "approved": false,
+        "updated_at": "2025-07-04 17:20:05",
+        "id": "68681893352fb"
+    },
+    "admin_002": {
+        "id": "admin_002",
+        "name": "Administrador do Sistema",
+        "email": "admin@sistema.com",
+        "password": "$2y$10$gPuCYRZEyTUlorNRaSrD9ez5S7XTaKkoTBlxlHcLSm824deDOpqBu",
+        "role": "admin",
+        "active": true,
+        "approved": true,
+        "created_at": "2025-07-04 20:41:19",
+        "updated_at": "2025-07-04 20:41:19"
+    },
+    "user_pending": {
+        "id": "user_pending",
+        "name": "Usuário Pendente",
+        "email": "pendente@exemplo.com",
+        "password": "$2y$10$NhuOr9XPqT5tT8SHyoOx\/.K0r36Py9S7ryqzysmQ3feMcYgGvlSiK",
+        "role": "user",
+        "active": true,
+        "approved": false,
+        "created_at": "2025-07-04 17:00:00",
+        "updated_at": "2025-07-04 17:00:00"
+    },
+    "user_inactive": {
+        "id": "user_inactive",
+        "name": "Usuário Inativo",
+        "email": "inativo@exemplo.com",
+        "password": "$2y$10$NhuOr9XPqT5tT8SHyoOx\/.K0r36Py9S7ryqzysmQ3feMcYgGvlSiK",
+        "role": "user",
+        "active": false,
+        "approved": true,
+        "created_at": "2025-07-04 16:00:00",
+        "updated_at": "2025-07-04 16:00:00"
+    },
+    "moderator_user": {
+        "id": "moderator_user",
+        "name": "Moderador Sistema",
+        "email": "moderador@exemplo.com",
+        "password": "$2y$10$NhuOr9XPqT5tT8SHyoOx\/.K0r36Py9S7ryqzysmQ3feMcYgGvlSiK",
+        "role": "moderator",
+        "active": true,
+        "approved": true,
+        "created_at": "2025-07-04 14:00:00",
+        "updated_at": "2025-07-04 14:00:00"
+    }
+}

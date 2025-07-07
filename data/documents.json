@@ -1,0 +1,41 @@
+{
+    "doc_002": {
+        "id": "doc_002",
+        "name": "Memorial Descritivo - Casa Moderna.docx",
+        "description": "Memorial descritivo detalhado do projeto da casa unifamiliar",
+        "type": "memorial",
+        "file_path": "documents\/memorial_descritivo_002.docx",
+        "size": 148,
+        "mime_type": "application\/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "user_id": "client_001",
+        "project_id": "project_002",
+        "created_at": "2025-06-16 10:15:00",
+        "updated_at": "2025-06-16 10:15:00"
+    },
+    "doc_003": {
+        "id": "doc_003",
+        "name": "Projeto Estrutural - Complexo Industrial.dwg",
+        "description": "Projeto estrutural completo do complexo industrial",
+        "type": "estrutural",
+        "file_path": "documents\/projeto_estrutural_003.dwg",
+        "size": 150,
+        "mime_type": "application\/octet-stream",
+        "user_id": "client_001",
+        "project_id": "project_004",
+        "created_at": "2025-04-25 13:45:00",
+        "updated_at": "2025-04-25 13:45:00"
+    },
+    "6868583fae903": {
+        "id": "6868583fae903",
+        "name": "Planta Baixa - Edifício Vista Mar.pdf",
+        "description": "Planta baixa do projeto Edifício Vista Mar",
+        "type": "planta",
+        "file_path": "documents/6868583fae474_Planta Baixa - Edifício Vista Mar.pdf",
+        "size": 169,
+        "mime_type": "application/pdf",
+        "user_id": "admin_002",
+        "project_id": "project_001",
+        "created_at": "2025-07-04 19:39:59",
+        "updated_at": "2025-07-04 19:39:59"
+    }
+}

@@ -1,0 +1,177 @@
+/* CSS específico para correção do layout da página de administração */
+
+/* Garantir que o layout não tenha scroll horizontal desnecessário */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+    box-sizing: border-box;
+}
+
+/* Configuração global para todos os elementos */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+/* Layout principal - sidebar fixa + conteúdo flexível */
+.main-layout {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Sidebar fixa */
+.sidebar {
+    width: 240px;
+    min-width: 240px;
+    max-width: 240px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Conteúdo principal */
+.main-content {
+    flex: 1;
+    margin-left: 260px;
+    width: calc(100% - 280px);
+    min-width: calc(100% - 280px);
+    max-width: calc(100% - 280px);
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 20px;
+}
+
+/* Container das páginas administrativas */
+.admin-container {
+    width: 100%;
+    max-width: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Páginas administrativas - sem top-bar */
+.admin-page .main-content {
+    padding: 0;
+}
+
+/* Tabelas responsivas */
+.table-responsive {
+    overflow-x: auto;
+    width: 100%;
+    max-width: 100%;
+}
+
+.table {
+    width: 100%;
+    min-width: 800px;
+    margin-bottom: 0;
+}
+
+/* Cards */
+.card {
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+}
+
+/* Media queries para responsividade */
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+    
+    .sidebar.show {
+        transform: translateX(0);
+    }
+    
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+        min-width: 100%;
+        max-width: 100%;
+        padding: 1rem;
+    }
+    
+    .table {
+        min-width: 600px;
+    }
+}
+
+@media (min-width: 769px) {
+    .main-content {
+        margin-left: 260px;
+        width: calc(100% - 280px);
+        min-width: calc(100% - 280px);
+        max-width: calc(100% - 280px);
+        padding: 20px;
+    }
+}
+
+/* Correções específicas para evitar quebras */
+.container-fluid {
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+.col-12 {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+/* Título da página */
+.page-header {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    margin-bottom: 0;
+    overflow: visible;
+}
+
+.page-header h1 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+    word-wrap: break-word;
+    white-space: normal;
+    overflow: visible;
+}
+
+.page-header p {
+    color: #6c757d;
+    margin-bottom: 0;
+    white-space: normal;
+    overflow: visible;
+}
+
+/* Espaçamento das seções */
+.card {
+    margin-left: 1.5rem;
+    margin-right: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Botão de chat */
+.chat-button {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 1001;
+}

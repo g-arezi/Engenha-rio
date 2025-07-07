@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste Específico - Edição de Usuário</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Teste Específico - Edição de Usuário</h1>
+        
+        <div class="card">
+            <div class="card-body">
+                <h5>Usuário: Administrador (admin_001)</h5>
+                <button class="btn btn-primary" onclick="testEditUser()">Editar Usuário</button>
+                <button class="btn btn-secondary" onclick="clearLogs()">Limpar Logs</button>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <h3>Logs de Debug:</h3>
+            <div id="logs" class="bg-light p-3" style="height: 300px; overflow-y: auto; font-family: monospace;"></div>
+        </div>
+        
+        <div class="mt-4">
+            <h3>Resultado:</h3>
+            <div id="result" class="border p-3"></div>
+        </div>
+    </div>
+
+    <!-- Modal de Edição -->
+    <div class="modal fade" id="editUserModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Usuário</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editUserForm">
+                        <input type="hidden" id="editUserId">
+                        <div class="mb-3">
+                            <label for="editUserName" class="form-label">Nome</label>
+                            <input type="text" class="form-control" id="editUserName">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editUserEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="editUserEmail">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editUserRole" class="form-label">Função</label>
+                            <select class="form-select" id="editUserRole">
+                                <option value="admin">Administrador</option>
+                                <option value="user">Usuário</option>
+                                <option value="moderator">Moderador</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="editUserActive">
+                                <label class="form-check-label" for="editUserActive">Ativo</label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="editUserApproved">
+                                <label class="form-check-label" for="editUserApproved">Aprovado</label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveUser()">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function log(message) {
+            const logsDiv = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            logsDiv.innerHTML += `[${timestamp}] ${message}\n`;
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+        }
+        
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+            document.getElementById('result').innerHTML = '';
+        }
+        
+        function showAlert(type, message) {
+            const alertClass = type === 'error' ? 'alert-danger' : 'alert-success';
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `<div class="alert ${alertClass}">${message}</div>`;
+        }
+        
+        function testEditUser() {
+            const userId = 'admin_001';
+            
+            log('Iniciando teste de edição de usuário...');
+            log(`ID do usuário: ${userId}`);
+            log(`URL: /admin/users/${userId}/edit`);
+            
+            fetch(`/admin/users/${userId}/edit`)
+                .then(response => {
+                    log(`Status da resposta: ${response.status}`);
+                    log(`Content-Type: ${response.headers.get('content-type')}`);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    return response.text();
+                })
+                .then(text => {
+                    log(`Texto da resposta: ${text}`);
+                    
+                    try {
+                        const data = JSON.parse(text);
+                        log('JSON parseado com sucesso');
+                        log(`Dados: ${JSON.stringify(data, null, 2)}`);
+                        
+                        if (data.success) {
+                            log('Resposta indica sucesso');
+                            const user = data.user;
+                            
+                            // Preencher formulário
+                            document.getElementById('editUserId').value = user.id;
+                            document.getElementById('editUserName').value = user.name;
+                            document.getElementById('editUserEmail').value = user.email;
+                            document.getElementById('editUserRole').value = user.role;
+                            document.getElementById('editUserActive').checked = user.active;
+                            document.getElementById('editUserApproved').checked = user.approved;
+                            
+                            log('Formulário preenchido');
+                            
+                            // Mostrar modal
+                            const modal = new bootstrap.Modal(document.getElementById('editUserModal'));
+                            modal.show();
+                            
+                            log('Modal exibido');
+                            showAlert('success', 'Usuário carregado com sucesso!');
+                        } else {
+                            log(`Erro do servidor: ${data.error}`);
+                            showAlert('error', data.error || 'Erro desconhecido');
+                        }
+                    } catch (jsonError) {
+                        log(`Erro ao parsear JSON: ${jsonError.message}`);
+                        showAlert('error', 'Erro ao processar resposta do servidor');
+                    }
+                })
+                .catch(error => {
+                    log(`Erro na requisição: ${error.message}`);
+                    showAlert('error', 'Erro ao carregar dados do usuário: ' + error.message);
+                });
+        }
+        
+        function saveUser() {
+            log('Função saveUser chamada (não implementada neste teste)');
+        }
+    </script>
+</body>
+</html>
