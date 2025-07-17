@@ -46,6 +46,14 @@ $user = \App\Core\Auth::user();
             </a>
         </li>
         
+        <!-- Seção Administração -->
+        <li class="nav-item">
+            <div class="nav-section-header text-white-50 small text-uppercase fw-bold mt-3 mb-2 px-2">
+                <i class="fas fa-cogs me-1"></i>
+                Administração
+            </div>
+        </li>
+        
         <li class="nav-item">
             <a class="nav-link text-white <?= $activeMenu === 'users' ? 'active' : '' ?>" 
                href="/admin/users">
@@ -55,10 +63,10 @@ $user = \App\Core\Auth::user();
         </li>
         
         <li class="nav-item">
-            <a class="nav-link text-white <?= $activeMenu === 'history' ? 'active' : '' ?>" 
-               href="/admin/history">
-                <i class="fas fa-history me-2"></i>
-                Histórico
+            <a class="nav-link text-white <?= $activeMenu === 'templates' ? 'active' : '' ?>" 
+               href="/admin/document-templates">
+                <i class="fas fa-file-text me-2"></i>
+                Templates
             </a>
         </li>
         
@@ -67,6 +75,22 @@ $user = \App\Core\Auth::user();
                href="/admin/settings">
                 <i class="fas fa-cog me-2"></i>
                 Configurações
+            </a>
+        </li>
+        
+        <!-- Seção Sistema -->
+        <li class="nav-item">
+            <div class="nav-section-header text-white-50 small text-uppercase fw-bold mt-3 mb-2 px-2">
+                <i class="fas fa-server me-1"></i>
+                Sistema
+            </div>
+        </li>
+        
+        <li class="nav-item">
+            <a class="nav-link text-white <?= $activeMenu === 'history' ? 'active' : '' ?>" 
+               href="/admin/history">
+                <i class="fas fa-history me-2"></i>
+                Histórico
             </a>
         </li>
         
@@ -84,10 +108,6 @@ $user = \App\Core\Auth::user();
             <a href="/dashboard" class="btn btn-outline-light btn-sm">
                 <i class="fas fa-home me-1"></i>
                 Dashboard Principal
-            </a>
-            <a href="/logout" class="btn btn-outline-danger btn-sm">
-                <i class="fas fa-sign-out-alt me-1"></i>
-                Sair
             </a>
         </div>
     </div>
@@ -118,6 +138,12 @@ $user = \App\Core\Auth::user();
 .sidebar .nav-link.active {
     background-color: rgba(255, 255, 255, 0.2);
     font-weight: bold;
+}
+
+.nav-section-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 0.5rem;
+    letter-spacing: 0.5px;
 }
 
 .sidebar-header {

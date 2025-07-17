@@ -1,0 +1,47 @@
+=== 2025-07-16 20:38:27 ===
+POST: Array
+(
+    [name] => Teste template
+    [description] => testad
+    [project_type] => comercial
+    [active] => 1
+    [required_documents] => Array
+        (
+            [0] => comprovante_endereco
+            [1] => escritura
+        )
+
+    [optional_documents] => Array
+        (
+            [0] => cnpj
+            [1] => cpf
+        )
+
+)
+
+================
+
+=== 2025-07-16 20:57:19 ===
+POST: Array
+(
+    [name] => Rafael marcos
+    [description] => teste
+    [project_type] => residencial
+    [active] => 1
+    [required_documents] => Array
+        (
+            [0] => escritura
+            [1] => comprovante_endereco
+        )
+
+    [optional_documents] => Array
+        (
+            [0] => cnpj
+            [1] => cpf
+            [2] => contrato_social
+        )
+
+)
+
+================
+

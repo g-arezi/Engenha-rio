@@ -1,4 +1,6 @@
 <?php 
+use App\Core\Auth;
+
 $title = 'Criar Novo Projeto - Engenha Rio';
 $showSidebar = true;
 $activeMenu = 'projects';
@@ -34,6 +36,34 @@ ob_start();
                     <textarea name="description" class="form-control" rows="5" placeholder="Descreva detalhadamente o projeto, incluindo objetivos, especificações e requisitos..." required></textarea>
                 </div>
                 
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">🏗️ Tipo de Projeto *</label>
+                            <select name="project_type" class="form-select" required onchange="loadDocumentTemplates()">
+                                <option value="">Selecione o tipo</option>
+                                <option value="residencial">Residencial</option>
+                                <option value="comercial">Comercial/Industrial</option>
+                                <option value="reforma">Reforma e Adequação</option>
+                                <option value="regularizacao">Regularização Predial</option>
+                                <option value="urbano">Projeto Urbano</option>
+                                <option value="infraestrutura">Infraestrutura</option>
+                                <option value="outro">Outros</option>
+                            </select>
+                            <small class="form-text text-muted">Defina o tipo para selecionar template de documentos</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">📋 Template de Documentos</label>
+                            <select name="document_template_id" class="form-select" id="documentTemplateSelect" disabled>
+                                <option value="">Primeiro selecione o tipo de projeto</option>
+                            </select>
+                            <small class="form-text text-muted">Define quais documentos o cliente deve enviar</small>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Seleção de Cliente - Obrigatório para Admin/Analista -->
                 <div class="mb-3">
                     <label class="form-label">👤 Cliente Responsável *</label>
@@ -60,11 +90,22 @@ ob_start();
                         <div class="mb-3">
                             <label class="form-label">👨‍💼 Analista Responsável</label>
                             <select name="analyst_id" class="form-select">
-                                <option value="">Selecionar mais tarde</option>
-                                <?php if (!empty($analysts)): ?>
-                                    <?php foreach ($analysts as $analyst): ?>
-                                        <option value="<?= $analyst['id'] ?>"><?= htmlspecialchars($analyst['name']) ?></option>
-                                    <?php endforeach; ?>
+                                <?php if (Auth::isAnalyst()): ?>
+                                    <option value="">Eu serei o responsável</option>
+                                    <?php if (!empty($analysts)): ?>
+                                        <?php foreach ($analysts as $analyst): ?>
+                                            <?php if ($analyst['id'] !== Auth::user()['id']): ?>
+                                                <option value="<?= $analyst['id'] ?>"><?= htmlspecialchars($analyst['name']) ?></option>
+                                            <?php endif; ?>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                <?php else: ?>
+                                    <option value="">Selecionar mais tarde</option>
+                                    <?php if (!empty($analysts)): ?>
+                                        <?php foreach ($analysts as $analyst): ?>
+                                            <option value="<?= $analyst['id'] ?>"><?= htmlspecialchars($analyst['name']) ?></option>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
                                 <?php endif; ?>
                             </select>
                         </div>
@@ -87,6 +128,9 @@ ob_start();
                     <h6 class="alert-heading">ℹ️ Informações Importantes</h6>
                     <ul class="mb-0">
                         <li><strong>Cliente obrigatório:</strong> Todo projeto deve ser vinculado a um cliente</li>
+                        <?php if (Auth::isAnalyst()): ?>
+                            <li><strong>Analista responsável:</strong> Você será automaticamente definido como analista responsável, a menos que selecione outro</li>
+                        <?php endif; ?>
                         <li>Após criar o projeto, o cliente poderá fazer upload de documentos</li>
                         <li>O analista será notificado por email sobre o novo projeto</li>
                         <li>O cliente receberá atualizações sobre o progresso do projeto</li>
@@ -224,6 +268,105 @@ ob_start();
     font-size: 0.75rem;
 }
 </style>
+
+<script>
+function loadDocumentTemplates() {
+    const projectType = document.querySelector('select[name="project_type"]').value;
+    const templateSelect = document.getElementById('documentTemplateSelect');
+    
+    if (!projectType) {
+        templateSelect.innerHTML = '<option value="">Primeiro selecione o tipo de projeto</option>';
+        templateSelect.disabled = true;
+        return;
+    }
+    
+    templateSelect.innerHTML = '<option value="">Carregando...</option>';
+    templateSelect.disabled = false;
+    
+    fetch(`/api/document-templates?project_type=${projectType}`)
+        .then(response => response.json())
+        .then(data => {
+            templateSelect.innerHTML = '<option value="">Nenhum template (documentos livres)</option>';
+            
+            if (data.success && data.templates.length > 0) {
+                data.templates.forEach(template => {
+                    const option = document.createElement('option');
+                    option.value = template.id;
+                    option.textContent = template.name;
+                    option.title = template.description;
+                    templateSelect.appendChild(option);
+                });
+            } else {
+                templateSelect.innerHTML += '<option value="" disabled>Nenhum template disponível para este tipo</option>';
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao carregar templates:', error);
+            templateSelect.innerHTML = '<option value="">Erro ao carregar templates</option>';
+        });
+}
+
+// Mostrar preview do template selecionado
+document.addEventListener('DOMContentLoaded', function() {
+    const templateSelect = document.getElementById('documentTemplateSelect');
+    if (templateSelect) {
+        templateSelect.addEventListener('change', function() {
+            const templateId = this.value;
+            const previewDiv = document.getElementById('templatePreview');
+            
+            if (!templateId) {
+                if (previewDiv) previewDiv.remove();
+                return;
+            }
+            
+            fetch(`/api/document-templates/${templateId}/details`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showTemplatePreview(data.template);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar detalhes do template:', error);
+                });
+        });
+    }
+});
+
+function showTemplatePreview(template) {
+    // Remover preview anterior
+    const existingPreview = document.getElementById('templatePreview');
+    if (existingPreview) existingPreview.remove();
+    
+    // Criar novo preview
+    const previewHtml = `
+        <div id="templatePreview" class="mt-3 alert alert-info">
+            <h6><i class="fas fa-file-alt me-2"></i>${template.name}</h6>
+            <p class="mb-2">${template.description}</p>
+            <div class="row">
+                <div class="col-md-6">
+                    <strong>Documentos Obrigatórios (${template.required_documents.length}):</strong>
+                    <ul class="mb-0">
+                        ${template.required_documents.map(doc => `<li>${doc.name}</li>`).join('')}
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <strong>Documentos Opcionais (${template.optional_documents.length}):</strong>
+                    <ul class="mb-0">
+                        ${template.optional_documents.length > 0 
+                            ? template.optional_documents.map(doc => `<li>${doc.name}</li>`).join('')
+                            : '<li class="text-muted">Nenhum documento opcional</li>'
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Inserir após o select
+    document.getElementById('documentTemplateSelect').insertAdjacentHTML('afterend', previewHtml);
+}
+</script>
 
 <?php
 $content = ob_get_clean();

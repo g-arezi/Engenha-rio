@@ -1,0 +1,17 @@
+{
+    "id": "TK20250717-2717",
+    "user_id": "admin_002",
+    "user_name": "Administrador do Sistema",
+    "user_email": "admin@sistema.com",
+    "project_id": "687929ed24fa5",
+    "project_name": "esba",
+    "subject": "teste",
+    "description": "validar a conversa ",
+    "priority": "media",
+    "status": "aberto",
+    "assigned_to": null,
+    "assigned_name": null,
+    "created_at": "2025-07-17 13:52:44",
+    "updated_at": "2025-07-17 13:52:44",
+    "responses": []
+}

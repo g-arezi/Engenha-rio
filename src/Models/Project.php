@@ -49,6 +49,99 @@ class Project extends Model
         return $clientProjects;
     }
     
+    /**
+     * Obter projetos com template de documentos
+     */
+    public function getWithDocumentTemplate($id)
+    {
+        $project = $this->find($id);
+        if (!$project) {
+            return null;
+        }
+        
+        // Se tem template associado, buscar detalhes
+        if (!empty($project['document_template_id'])) {
+            $templateModel = new DocumentTemplate();
+            $template = $templateModel->getWithDocuments($project['document_template_id']);
+            $project['document_template'] = $template;
+        }
+        
+        return $project;
+    }
+    
+    /**
+     * Associar template de documentos ao projeto
+     */
+    public function associateDocumentTemplate($projectId, $templateId)
+    {
+        return $this->update($projectId, [
+            'document_template_id' => $templateId,
+            'updated_at' => date('Y-m-d H:i:s')
+        ]);
+    }
+    
+    /**
+     * Obter projetos por template
+     */
+    public function getByDocumentTemplate($templateId)
+    {
+        return $this->where('document_template_id', $templateId);
+    }
+    
+    /**
+     * Obter estatísticas de documentos do projeto
+     */
+    public function getDocumentStats($projectId)
+    {
+        $project = $this->getWithDocumentTemplate($projectId);
+        if (!$project || !isset($project['document_template'])) {
+            return null;
+        }
+        
+        $template = $project['document_template'];
+        $requiredDocs = $template['required_documents'] ?? [];
+        $optionalDocs = $template['optional_documents'] ?? [];
+        
+        // Buscar documentos enviados
+        $documentModel = new Document();
+        $uploadedDocs = $documentModel->getByProject($projectId);
+        
+        $stats = [
+            'required_total' => count($requiredDocs),
+            'required_uploaded' => 0,
+            'optional_total' => count($optionalDocs),
+            'optional_uploaded' => 0,
+            'completion_percentage' => 0
+        ];
+        
+        // Verificar quais documentos obrigatórios foram enviados
+        foreach ($requiredDocs as $reqDoc) {
+            foreach ($uploadedDocs as $uploaded) {
+                if ($uploaded['type'] === $reqDoc['type']) {
+                    $stats['required_uploaded']++;
+                    break;
+                }
+            }
+        }
+        
+        // Verificar documentos opcionais
+        foreach ($optionalDocs as $optDoc) {
+            foreach ($uploadedDocs as $uploaded) {
+                if ($uploaded['type'] === $optDoc['type']) {
+                    $stats['optional_uploaded']++;
+                    break;
+                }
+            }
+        }
+        
+        // Calcular porcentagem de conclusão baseada nos obrigatórios
+        if ($stats['required_total'] > 0) {
+            $stats['completion_percentage'] = round(($stats['required_uploaded'] / $stats['required_total']) * 100);
+        }
+        
+        return $stats;
+    }
+    
     public function getByAnalyst($analystId)
     {
         return $this->where('analyst_id', $analystId);

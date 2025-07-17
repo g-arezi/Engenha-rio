@@ -55,6 +55,15 @@ if (preg_match('/\.(css|js|png|jpg|jpeg|gif|svg|webp|ico|woff|woff2|ttf|eot|pdf)
     return true;
 }
 
+// Rotas especiais para documentos
+if (preg_match('/^\/documents\/([^\/]+)\/info$/', $uri, $matches)) {
+    error_log("ROUTER.PHP - Rota de info de documento: " . $uri);
+    $_GET['action'] = 'downloadInfo';
+    $_GET['id'] = $matches[1];
+    require_once 'index.php';
+    return true;
+}
+
 // Para todas as outras requisições, redirecionar para index.php
 error_log("ROUTER.PHP - Redirecionando para index.php: " . $uri);
 require_once 'index.php';

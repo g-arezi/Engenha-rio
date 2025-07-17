@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste Direto Upload</title>
+</head>
+<body>
+    <h1>Teste Direto de Upload</h1>
+    
+    <button onclick="testarEndpoint()">Testar Endpoint /documents/upload</button>
+    <div id="resultado"></div>
+    
+    <script>
+    function testarEndpoint() {
+        const resultDiv = document.getElementById('resultado');
+        resultDiv.innerHTML = '<p>Testando...</p>';
+        
+        // Criar um FormData simples para testar
+        const formData = new FormData();
+        formData.append('test', 'true');
+        formData.append('project_id', 'project_002');
+        
+        console.log('Testando endpoint /documents/upload');
+        
+        fetch('/documents/upload', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            console.log('Status:', response.status);
+            console.log('Headers:', response.headers);
+            return response.text();
+        })
+        .then(text => {
+            console.log('Response:', text);
+            resultDiv.innerHTML = `
+                <h3>Resposta recebida:</h3>
+                <pre>${text}</pre>
+            `;
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            resultDiv.innerHTML = `
+                <h3>Erro:</h3>
+                <p style="color: red;">${error.message}</p>
+            `;
+        });
+    }
+    </script>
+</body>
+</html>

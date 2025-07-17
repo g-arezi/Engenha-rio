@@ -1,0 +1,40 @@
+{
+    "id": "TK20250716-2294",
+    "user_id": "admin_002",
+    "user_name": "Administrador do Sistema",
+    "user_email": "admin@sistema.com",
+    "subject": "teste",
+    "description": "teste",
+    "priority": "media",
+    "status": "em_andamento",
+    "assigned_to": "admin_002",
+    "assigned_name": "Administrador do Sistema",
+    "created_at": "2025-07-16 14:09:31",
+    "updated_at": "2025-07-16 14:16:25",
+    "responses": [
+        {
+            "id": "6877de62a2180",
+            "user_id": "admin_002",
+            "user_name": "Administrador do Sistema",
+            "user_role": "admin",
+            "message": "teste",
+            "created_at": "2025-07-16 14:16:18"
+        },
+        {
+            "id": "6877de6660563",
+            "user_id": "admin_002",
+            "user_name": "Administrador do Sistema",
+            "user_role": "admin",
+            "message": "teste",
+            "created_at": "2025-07-16 14:16:22"
+        },
+        {
+            "id": "6877de69055e3",
+            "user_id": "admin_002",
+            "user_name": "Administrador do Sistema",
+            "user_role": "admin",
+            "message": "teste",
+            "created_at": "2025-07-16 14:16:25"
+        }
+    ]
+}

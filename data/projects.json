@@ -1,20 +1,4 @@
 {
-    "project_001": {
-        "id": "project_001",
-        "name": "Edif\u00edcio Residencial Vista Mar",
-        "description": "Projeto arquitet\u00f4nico para edif\u00edcio residencial de 15 andares com vista para o mar",
-        "status": "concluido",
-        "priority": "alta",
-        "user_id": "client_001",
-        "client_id": "client_001",
-        "clients": [
-            "client_001"
-        ],
-        "analyst_id": "analyst_001",
-        "deadline": "2025-08-15",
-        "created_at": "2025-07-01 10:00:00",
-        "updated_at": "2025-07-04 18:56:17"
-    },
     "project_002": {
         "id": "project_002",
         "name": "Casa Unifamiliar Moderna",
@@ -55,17 +39,77 @@
         "created_at": "2025-04-20 08:20:00",
         "updated_at": "2025-07-01 12:10:00"
     },
-    "686bea53f0c0e": {
-        "name": "Projeto Teste",
-        "description": "um projeto para testar o sistema ",
+    "6877d2c565353": {
+        "name": "Projeto Inova",
+        "description": "teste projeto inova",
         "deadline": "2025-07-31",
+        "user_id": "admin_002",
+        "client_id": "686c14c547d77",
+        "analyst_id": "686856ad9c7f8",
+        "status": "aguardando",
+        "priority": "normal",
+        "created_at": "2025-07-16 13:26:45",
+        "updated_at": "2025-07-16 13:26:45",
+        "id": "6877d2c565353"
+    },
+    "68780d9cb2343": {
+        "name": "Projeto Inova2",
+        "description": "projeto de testes",
+        "deadline": "2025-07-31",
+        "user_id": "admin_002",
+        "client_id": "686c14c547d77",
+        "analyst_id": "686856ad9c7f8",
+        "project_type": "residencial",
+        "document_template_id": "687804e6a2001",
+        "status": "aguardando",
+        "priority": "normal",
+        "created_at": "2025-07-16 17:37:48",
+        "updated_at": "2025-07-16 17:37:48",
+        "id": "68780d9cb2343"
+    },
+    "68793ce59b9a3": {
+        "name": "velocity ",
+        "description": "projeto ppci para LE",
+        "deadline": "2025-07-24",
+        "user_id": "686856ad9c7f8",
+        "client_id": "68792ec48a719",
+        "analyst_id": "686856ad9c7f8",
+        "project_type": "comercial",
+        "document_template_id": "template_002",
+        "status": "aguardando",
+        "priority": "normal",
+        "created_at": "2025-07-17 15:11:49",
+        "updated_at": "2025-07-17 15:11:49",
+        "id": "68793ce59b9a3"
+    },
+    "68793d544d33c": {
+        "name": "TESTE",
+        "description": "PRJETO PPCI",
+        "deadline": "2025-07-22",
+        "user_id": "686856ad9c7f8",
+        "client_id": "686856c61b572",
+        "analyst_id": "686856ad9c7f8",
+        "project_type": "comercial",
+        "document_template_id": "template_002",
+        "status": "aguardando",
+        "priority": "normal",
+        "created_at": "2025-07-17 15:13:40",
+        "updated_at": "2025-07-17 15:13:40",
+        "id": "68793d544d33c"
+    },
+    "68794f5ea7829": {
+        "name": "Teste cria\u00e7ao modificadaa",
+        "description": "Teste cria\u00e7ao modificadaa",
+        "deadline": "2025-07-24",
         "user_id": "admin_002",
         "client_id": "686856c61b572",
         "analyst_id": "686856ad9c7f8",
+        "project_type": "comercial",
+        "document_template_id": "68794ed18abab",
         "status": "aguardando",
-        "priority": "media",
-        "created_at": "2025-07-07 12:40:03",
-        "updated_at": "2025-07-07 12:40:03",
-        "id": "686bea53f0c0e"
+        "priority": "normal",
+        "created_at": "2025-07-17 16:30:38",
+        "updated_at": "2025-07-17 16:30:38",
+        "id": "68794f5ea7829"
     }
 }

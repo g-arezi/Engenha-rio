@@ -1,5 +1,6 @@
 <?php 
 $title = 'Administração - Engenha Rio';
+$pageTitle = 'Administração';
 $showSidebar = true;
 $activeMenu = 'admin';
 ob_start();

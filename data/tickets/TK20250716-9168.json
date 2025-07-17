@@ -1,0 +1,58 @@
+{
+    "id": "TK20250716-9168",
+    "user_id": "admin_002",
+    "user_name": "Administrador do Sistema",
+    "user_email": "admin@sistema.com",
+    "project_id": "6877d2c565353",
+    "project_name": "Projeto Inova",
+    "subject": "teste proj",
+    "description": "testee",
+    "priority": "media",
+    "status": "fechado",
+    "assigned_to": "admin_002",
+    "assigned_name": "Administrador do Sistema",
+    "created_at": "2025-07-16 14:37:11",
+    "updated_at": "2025-07-16 18:11:56",
+    "responses": [
+        {
+            "id": "687813f3db02f",
+            "user_id": "686856ad9c7f8",
+            "user_name": "teste",
+            "user_role": "analista",
+            "message": "teste",
+            "created_at": "2025-07-16 18:04:51"
+        },
+        {
+            "id": "6878151ce763c",
+            "user_id": "686856ad9c7f8",
+            "user_name": "teste",
+            "user_role": "analista",
+            "message": "teste",
+            "created_at": "2025-07-16 18:09:48"
+        },
+        {
+            "id": "68781532e8cf6",
+            "user_id": "admin_002",
+            "user_name": "Administrador do Sistema",
+            "user_role": "admin",
+            "message": "teste",
+            "created_at": "2025-07-16 18:10:10"
+        },
+        {
+            "id": "687815945a2dc",
+            "user_id": "admin_002",
+            "user_name": "Administrador do Sistema",
+            "user_role": "admin",
+            "message": "teste",
+            "created_at": "2025-07-16 18:11:48"
+        },
+        {
+            "id": "6878159c992c5",
+            "user_id": "admin_002",
+            "user_name": "Administrador do Sistema",
+            "user_role": "admin",
+            "message": "fechado",
+            "created_at": "2025-07-16 18:11:56"
+        }
+    ]
+}

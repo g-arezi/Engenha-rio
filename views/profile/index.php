@@ -1,8 +1,13 @@
 <?php 
 $title = 'Meu Perfil - Engenha Rio';
+$pageTitle = 'Perfil';
 $showSidebar = true;
 $activeMenu = 'profile';
 ob_start();
+
+// Verificar mensagens de sucesso e erro
+$success = $_GET['success'] ?? null;
+$error = $_GET['error'] ?? null;
 ?>
 
 <div class="row">
@@ -16,6 +21,54 @@ ob_start();
     </div>
 </div>
 
+<?php if ($success): ?>
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <?php if ($success === 'password_updated'): ?>
+                    Senha alterada com sucesso!
+                <?php else: ?>
+                    Perfil atualizado com sucesso!
+                <?php endif; ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
+
+<?php if ($error): ?>
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <?php
+                switch ($error) {
+                    case 'current_password_required':
+                        echo 'A senha atual é obrigatória.';
+                        break;
+                    case 'new_password_required':
+                        echo 'A nova senha é obrigatória.';
+                        break;
+                    case 'password_mismatch':
+                        echo 'A confirmação da senha não confere.';
+                        break;
+                    case 'password_too_short':
+                        echo 'A senha deve ter pelo menos 6 caracteres.';
+                        break;
+                    case 'invalid_current_password':
+                        echo 'A senha atual está incorreta.';
+                        break;
+                    default:
+                        echo 'Ocorreu um erro. Tente novamente.';
+                }
+                ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
+
 <div class="row">
     <div class="col-lg-8">
         <div class="content-section">
@@ -24,13 +77,13 @@ ob_start();
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label class="form-label">👤 Nome Completo</label>
-                            <input type="text" class="form-control" value="Administrador" readonly>
+                            <input type="text" class="form-control" value="<?= htmlspecialchars($user['name'] ?? 'Usuário') ?>" readonly>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label class="form-label">📧 Email</label>
-                            <input type="email" class="form-control" value="admin@sistema.com" readonly>
+                            <input type="email" class="form-control" value="<?= htmlspecialchars($user['email'] ?? 'N/A') ?>" readonly>
                         </div>
                     </div>
                 </div>
@@ -39,7 +92,14 @@ ob_start();
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label class="form-label">🏷️ Tipo de Usuário</label>
-                            <input type="text" class="form-control" value="<?= ucfirst($user['role'] ?? 'Usuário') ?>" readonly>
+                            <input type="text" class="form-control" value="<?= 
+                                match($user['role'] ?? 'cliente') {
+                                    'admin' => 'Administrador',
+                                    'analista' => 'Analista',
+                                    'cliente' => 'Cliente',
+                                    default => 'Usuário'
+                                }
+                            ?>" readonly>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -55,40 +115,41 @@ ob_start();
         <div class="content-section">
             <h5 class="mb-3">🔐 Alterar Senha</h5>
             
-            <form>
+            <form method="POST" action="/profile" id="passwordForm">
+                <input type="hidden" name="_method" value="PUT">
                 <div class="row">
                     <div class="col-md-4">
                         <div class="mb-3">
                             <label class="form-label">Senha Atual</label>
-                            <input type="password" class="form-control" placeholder="••••••••">
+                            <input type="password" class="form-control" name="current_password" placeholder="••••••••" required>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="mb-3">
                             <label class="form-label">Nova Senha</label>
-                            <input type="password" class="form-control" placeholder="••••••••">
+                            <input type="password" class="form-control" name="new_password" placeholder="••••••••" minlength="6" required>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="mb-3">
                             <label class="form-label">Confirmar Nova Senha</label>
-                            <input type="password" class="form-control" placeholder="••••••••">
+                            <input type="password" class="form-control" name="confirm_password" placeholder="••••••••" minlength="6" required>
                         </div>
                     </div>
                 </div>
                 
                 <div class="mb-3">
                     <small class="text-muted">
-                        Deixe em branco para manter a senha atual
+                        A senha deve ter pelo menos 6 caracteres
                     </small>
                 </div>
                 
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save me-1"></i>
-                        Salvar Alterações
+                        Alterar Senha
                     </button>
-                    <button type="button" class="btn btn-outline-secondary">
+                    <button type="button" class="btn btn-outline-secondary" onclick="window.location.href='/dashboard'">
                         <i class="fas fa-arrow-left me-1"></i>
                         Voltar ao Dashboard
                     </button>
@@ -147,6 +208,79 @@ ob_start();
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const passwordForm = document.getElementById('passwordForm');
+    const newPasswordInput = document.querySelector('input[name="new_password"]');
+    const confirmPasswordInput = document.querySelector('input[name="confirm_password"]');
+    const submitButton = passwordForm.querySelector('button[type="submit"]');
+    
+    // Validação em tempo real
+    function validatePasswords() {
+        const newPassword = newPasswordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+        
+        // Remover classes anteriores
+        confirmPasswordInput.classList.remove('is-valid', 'is-invalid');
+        
+        if (confirmPassword && newPassword) {
+            if (newPassword === confirmPassword) {
+                confirmPasswordInput.classList.add('is-valid');
+                submitButton.disabled = false;
+            } else {
+                confirmPasswordInput.classList.add('is-invalid');
+                submitButton.disabled = true;
+            }
+        } else {
+            submitButton.disabled = false;
+        }
+    }
+    
+    // Adicionar eventos
+    newPasswordInput.addEventListener('input', validatePasswords);
+    confirmPasswordInput.addEventListener('input', validatePasswords);
+    
+    // Validação no submit
+    passwordForm.addEventListener('submit', function(e) {
+        const currentPassword = document.querySelector('input[name="current_password"]').value;
+        const newPassword = newPasswordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+        
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            e.preventDefault();
+            alert('Todos os campos são obrigatórios!');
+            return;
+        }
+        
+        if (newPassword !== confirmPassword) {
+            e.preventDefault();
+            alert('As senhas não conferem!');
+            return;
+        }
+        
+        if (newPassword.length < 6) {
+            e.preventDefault();
+            alert('A nova senha deve ter pelo menos 6 caracteres!');
+            return;
+        }
+        
+        // Confirmar alteração
+        if (!confirm('Tem certeza que deseja alterar sua senha?')) {
+            e.preventDefault();
+        }
+    });
+    
+    // Auto-dismiss alerts após 5 segundos
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        setTimeout(() => {
+            const bsAlert = new bootstrap.Alert(alert);
+            bsAlert.close();
+        }, 5000);
+    });
+});
+</script>
 
 <?php
 $content = ob_get_clean();

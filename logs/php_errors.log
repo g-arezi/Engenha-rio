@@ -1,0 +1,90 @@
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Engenha Rio - Sistema inicializado em 2025-07-16 18:43:15
+[16-Jul-2025 18:43:15 America/Sao_Paulo] INDEX.PHP - Requisição: /documents
+[16-Jul-2025 18:43:15 America/Sao_Paulo] FALLBACK DOCUMENTS: Interceptando /documents no index.php
+[16-Jul-2025 18:43:15 America/Sao_Paulo] FALLBACK DOCUMENTS: Usuário autenticado, carregando DocumentController
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Engenha Rio - Sistema inicializado em 2025-07-16 18:43:15
+[16-Jul-2025 18:43:15 America/Sao_Paulo] INDEX.PHP - Requisição: /api/projects
+[16-Jul-2025 18:43:15 America/Sao_Paulo] INDEX.PHP - Antes do dispatch: URI = /api/projects
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Method: GET, URI: /api/projects
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - URI after normalization: /api/projects
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Total routes: 72
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Checking route: GET /
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Checking route: GET /login
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Checking route: POST /login
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Checking route: GET /register
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Checking route: POST /register
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Checking route: GET /logout
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Checking route: GET /assets/images/engenhario-logo-new.png
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Checking route: GET /dashboard
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Checking route: GET /projects
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Checking route: GET /projects/create
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Checking route: POST /projects
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Checking route: GET /projects/{id}
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Checking route: GET /projects/{id}/edit
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Checking route: PUT /projects/{id}
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Checking route: DELETE /projects/{id}
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Checking route: GET /projects/{id}/documents
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Checking route: PUT /projects/{id}/status
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Checking route: GET /documents
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Checking route: POST /documents/upload
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Checking route: GET /documents/{id}
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Checking route: GET /documents/{id}/edit
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Checking route: PUT /documents/{id}
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Checking route: GET /documents/{id}/preview
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Checking route: GET /documents/{id}/download
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Checking route: DELETE /documents/{id}
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Checking route: GET /profile
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Checking route: PUT /profile
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Checking route: POST /api/tickets/create
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Checking route: GET /api/tickets/my
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Checking route: GET /api/tickets/all
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Checking route: GET /tickets
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Checking route: GET /tickets/{id}
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Checking route: POST /api/tickets/{id}/respond
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Checking route: POST /api/tickets/{id}/status
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Checking route: GET /document-templates
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Checking route: GET /api/document-templates
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Checking route: GET /api/document-templates/{id}/details
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Checking route: GET /api/projects
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Route matched: /api/projects
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Middlewares: auth
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Executing middleware: auth
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Middleware Debug - Executing: auth
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Middleware Debug - Session status: 2
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Middleware Debug - Session data: Array
+(
+    [user_id] => 686c14c547d77
+)
+
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Middleware Debug - Auth check result: true
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Middleware auth passed
+[16-Jul-2025 18:43:15 America/Sao_Paulo] Router Debug - Executing handler: ProjectController@apiList
+[16-Jul-2025 18:43:19 America/Sao_Paulo] Engenha Rio - Sistema inicializado em 2025-07-16 18:43:19
+[16-Jul-2025 18:43:19 America/Sao_Paulo] INDEX.PHP - Requisição: /projects
+[16-Jul-2025 18:43:20 America/Sao_Paulo] INDEX.PHP - Antes do dispatch: URI = /projects
+[16-Jul-2025 18:43:20 America/Sao_Paulo] Router Debug - Method: GET, URI: /projects
+[16-Jul-2025 18:43:20 America/Sao_Paulo] Router Debug - URI after normalization: /projects
+[16-Jul-2025 18:43:20 America/Sao_Paulo] Router Debug - Total routes: 72
+[16-Jul-2025 18:43:20 America/Sao_Paulo] Router Debug - Checking route: GET /
+[16-Jul-2025 18:43:20 America/Sao_Paulo] Router Debug - Checking route: GET /login
+[16-Jul-2025 18:43:20 America/Sao_Paulo] Router Debug - Checking route: POST /login
+[16-Jul-2025 18:43:20 America/Sao_Paulo] Router Debug - Checking route: GET /register
+[16-Jul-2025 18:43:20 America/Sao_Paulo] Router Debug - Checking route: POST /register
+[16-Jul-2025 18:43:20 America/Sao_Paulo] Router Debug - Checking route: GET /logout
+[16-Jul-2025 18:43:20 America/Sao_Paulo] Router Debug - Checking route: GET /assets/images/engenhario-logo-new.png
+[16-Jul-2025 18:43:20 America/Sao_Paulo] Router Debug - Checking route: GET /dashboard
+[16-Jul-2025 18:43:20 America/Sao_Paulo] Router Debug - Checking route: GET /projects
+[16-Jul-2025 18:43:20 America/Sao_Paulo] Router Debug - Route matched: /projects
+[16-Jul-2025 18:43:20 America/Sao_Paulo] Router Debug - Middlewares: auth
+[16-Jul-2025 18:43:20 America/Sao_Paulo] Router Debug - Executing middleware: auth
+[16-Jul-2025 18:43:20 America/Sao_Paulo] Middleware Debug - Executing: auth
+[16-Jul-2025 18:43:20 America/Sao_Paulo] Middleware Debug - Session status: 2
+[16-Jul-2025 18:43:20 America/Sao_Paulo] Middleware Debug - Session data: Array
+(
+    [user_id] => 686c14c547d77
+)
+
+[16-Jul-2025 18:43:20 America/Sao_Paulo] Middleware Debug - Auth check result: true
+[16-Jul-2025 18:43:20 America/Sao_Paulo] Router Debug - Middleware auth passed
+[16-Jul-2025 18:43:20 America/Sao_Paulo] Router Debug - Executing handler: ProjectController@index
+[16-Jul-2025 18:43:20 America/Sao_Paulo] INDEX.PHP - Dispatch executado com sucesso

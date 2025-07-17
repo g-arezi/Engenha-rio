@@ -55,12 +55,20 @@ class AuthController extends Controller
     {
         $data = $_POST;
         
+        // Forçar o role como 'cliente' para registro público
+        $data['role'] = 'cliente';
+        
         $errors = $this->validate($data, [
             'name' => 'required|min:2',
             'email' => 'required|email',
             'password' => 'required|min:6',
             'role' => 'required'
         ]);
+        
+        // Validação adicional: apenas 'cliente' é permitido no registro público
+        if ($data['role'] !== 'cliente') {
+            $errors['role'] = 'Apenas clientes podem se registrar publicamente';
+        }
         
         if (!empty($errors)) {
             Session::flash('errors', $errors);

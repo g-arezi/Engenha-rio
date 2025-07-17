@@ -1,150 +1,311 @@
 <?php 
 $title = 'Dashboard - Engenha Rio';
+$pageTitle = 'Dashboard';
 $showSidebar = true;
 $activeMenu = 'dashboard';
 ob_start();
+
+// Incluir os modelos necessários
+require_once __DIR__ . '/../../src/Models/Project.php';
+require_once __DIR__ . '/../../src/Models/User.php';
+require_once __DIR__ . '/../../src/Core/Auth.php';
+
+use App\Models\Project;
+use App\Models\User;
+use App\Core\Auth;
+
+// Obter o usuário atual
+$currentUser = Auth::user();
+$projectModel = new Project();
+$userModel = new User();
+
+// Obter projetos baseado no tipo de usuário
+$projects = [];
+if ($currentUser) {
+    if (Auth::isAdmin()) {
+        // Administradores veem todos os projetos
+        $projects = $projectModel->all();
+    } elseif (Auth::isAnalyst()) {
+        // Analistas veem projetos atribuídos a eles
+        $projects = $projectModel->getByAnalyst($currentUser['id']);
+    } elseif (Auth::isClient()) {
+        // Clientes veem apenas projetos vinculados a eles
+        $projects = $projectModel->getByClient($currentUser['id']);
+    }
+}
+
+// Dados para os cards de status baseados nos projetos reais
+$statusCounts = [
+    'em_analise' => 0,
+    'reprovado' => 0,
+    'pendentes' => 0,
+    'aprovado' => 0
+];
+
+// Contar status dos projetos
+foreach ($projects as $project) {
+    $status = $project['status'] ?? '';
+    switch ($status) {
+        case 'aguardando':
+            $statusCounts['em_analise']++;
+            break;
+        case 'atrasado':
+            $statusCounts['reprovado']++;
+            break;
+        case 'pendente':
+            $statusCounts['pendentes']++;
+            break;
+        case 'aprovado':
+            $statusCounts['aprovado']++;
+            break;
+    }
+}
+
+$statusData = [
+    'em_analise' => [
+        'count' => $statusCounts['em_analise'],
+        'color' => '#007BFF',
+        'label' => 'Em análise',
+        'code' => '#045DBD'
+    ],
+    'reprovado' => [
+        'count' => $statusCounts['reprovado'],
+        'color' => '#E32528',
+        'label' => 'Reprovado',
+        'code' => '#AD070A'
+    ],
+    'pendentes' => [
+        'count' => $statusCounts['pendentes'],
+        'color' => '#F9B800',
+        'label' => 'Pendentes',
+        'code' => '#B88700'
+    ],
+    'aprovado' => [
+        'count' => $statusCounts['aprovado'],
+        'color' => '#00A65A',
+        'label' => 'Aprovado',
+        'code' => '#028F46'
+    ]
+];
+
+// Preparar dados da tabela de projetos (últimos 5)
+$projectsData = [];
+$recentProjects = array_slice($projects, 0, 5);
+foreach ($recentProjects as $project) {
+    // Obter nome do cliente se disponível
+    $clientName = 'N/A';
+    if (!empty($project['client_id'])) {
+        $client = $userModel->find($project['client_id']);
+        $clientName = $client ? $client['name'] : 'Cliente não encontrado';
+    } elseif (!empty($project['user_id'])) {
+        $client = $userModel->find($project['user_id']);
+        $clientName = $client ? $client['name'] : 'Usuário não encontrado';
+    }
+    
+    $statusTranslation = [
+        'aguardando' => 'Em análise',
+        'pendente' => 'Pendente',
+        'aprovado' => 'Aprovado',
+        'atrasado' => 'Atrasado',
+        'concluido' => 'Concluído'
+    ];
+    
+    $projectsData[] = [
+        'name' => $project['name'],
+        'client' => $clientName,
+        'status' => $statusTranslation[$project['status']] ?? ucfirst($project['status']),
+        'updated' => date('d.m.Y - H:i', strtotime($project['updated_at']))
+    ];
+}
+
+// Se não houver projetos, mostrar dados de exemplo
+if (empty($projectsData)) {
+    $projectsData = [
+        ['name' => 'Nenhum projeto encontrado', 'client' => '-', 'status' => '-', 'updated' => '-']
+    ];
+}
 ?>
 
-<div class="row">
-    <div class="col-12 mb-4">
-        <div class="d-flex justify-content-between align-items-center">
-            <h2 class="h4 mb-0">Dashboard</h2>
-            <span class="badge bg-primary">Admin</span>
-        </div>
-        <p class="text-muted">Bem-vindo, Administrador!</p>
-    </div>
-</div>
+<style>
+    .dashboard-container {
+        background-color: #FFFFFF;
+        min-height: 100vh;
+        padding: 0;
+    }
+    
+    .stats-section {
+        padding: 2rem;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .status-card {
+        border-radius: 12px;
+        color: white;
+        position: relative;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        min-height: 120px;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .status-stripe {
+        width: 100%;
+        height: 32px;
+        margin: 0;
+        border-radius: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: white;
+    }
+    
+    .status-content {
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        flex: 1;
+    }
+    
+    .status-number {
+        font-size: 3rem;
+        font-weight: bold;
+        margin: 0;
+    }
+    
+    .projects-section {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    
+    .projects-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .projects-table th {
+        background-color: #F8F9FA;
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: #495057;
+        border-bottom: 1px solid #E9ECEF;
+    }
+    
+    .projects-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #F8F9FA;
+    }
+    
+    .project-name {
+        color: #007BFF;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    
+    .project-name:hover {
+        text-decoration: underline;
+    }
+    
+    .status-badge {
+        background-color: #007BFF;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    .main-background {
+        background-color: #FFFFFF;
+        color: #000000;
+    }
+    
+    .sidebar-bg {
+        background-color: #262626 !important;
+    }
+    
+    .footer-bg {
+        background-color: #F8F9FA;
+    }
+</style>
 
-<div class="stats-grid">
-    <div class="stat-card" style="background: #007bff; color: white;">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <i class="fas fa-users fa-2x"></i>
+<div class="dashboard-container main-background">
+    <!-- Stats Section -->
+    <div class="stats-section">
+        <div class="stats-grid">
+            <!-- Card Em Análise -->
+            <div class="status-card" style="background-color: #007BFF;">
+                <div class="status-content">
+                    <div class="status-number"><?= $statusData['em_analise']['count'] ?></div>
+                </div>
+                <div class="status-stripe" style="background-color: #045DBD;">Em análise</div>
             </div>
-            <div class="text-end">
-                <div class="stat-number"><?= $stats['users'] ?? 3 ?></div>
-                <h6 class="mb-0">Usuários</h6>
+            
+            <!-- Card Reprovado -->
+            <div class="status-card" style="background-color: #E32528;">
+                <div class="status-content">
+                    <div class="status-number"><?= $statusData['reprovado']['count'] ?></div>
+                </div>
+                <div class="status-stripe" style="background-color: #AD070A;">Reprovado</div>
             </div>
-        </div>
-    </div>
-    
-    <div class="stat-card" style="background: #28a745; color: white;">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <i class="fas fa-folder fa-2x"></i>
+            
+            <!-- Card Pendentes -->
+            <div class="status-card" style="background-color: #F9B800;">
+                <div class="status-content">
+                    <div class="status-number"><?= $statusData['pendentes']['count'] ?></div>
+                </div>
+                <div class="status-stripe" style="background-color: #B88700;">Pendentes</div>
             </div>
-            <div class="text-end">
-                <div class="stat-number"><?= $stats['projects'] ?? 3 ?></div>
-                <h6 class="mb-0">Projetos</h6>
-            </div>
-        </div>
-    </div>
-    
-    <div class="stat-card" style="background: #ffc107; color: white;">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <i class="fas fa-clock fa-2x"></i>
-            </div>
-            <div class="text-end">
-                <div class="stat-number"><?= $stats['pending'] ?? 1 ?></div>
-                <h6 class="mb-0">Pendentes</h6>
-            </div>
-        </div>
-    </div>
-    
-    <div class="stat-card" style="background: #17a2b8; color: white;">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <i class="fas fa-file-alt fa-2x"></i>
-            </div>
-            <div class="text-end">
-                <div class="stat-number"><?= $stats['documents'] ?? 8 ?></div>
-                <h6 class="mb-0">Documentos</h6>
+            
+            <!-- Card Aprovado -->
+            <div class="status-card" style="background-color: #00A65A;">
+                <div class="status-content">
+                    <div class="status-number"><?= $statusData['aprovado']['count'] ?></div>
+                </div>
+                <div class="status-stripe" style="background-color: #028F46;">Aprovado</div>
             </div>
         </div>
-    </div>
-</div>
 
-<div class="content-section">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="mb-0">📁 Projetos Recentes</h5>
-        <a href="/projects" class="btn btn-outline-primary btn-sm">Ver Todos</a>
-    </div>
-    
-    <?php if (!empty($recentProjects)): ?>
-        <div class="table-responsive">
-            <table class="table table-hover">
+        
+        <!-- Projects Table -->
+        <div class="projects-section">
+            <table class="projects-table">
                 <thead>
                     <tr>
                         <th>Projeto</th>
                         <th>Cliente</th>
                         <th>Status</th>
-                        <th>Criado em</th>
+                        <th>Atualizado em</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($recentProjects as $project): ?>
+                    <?php foreach ($projectsData as $project): ?>
                     <tr>
-                        <td>
-                            <a href="/projects/<?= $project['id'] ?>" class="text-decoration-none">
-                                <?= htmlspecialchars($project['name'] ?? 'Projeto') ?>
-                            </a>
-                        </td>
-                        <td>Cliente Teste</td>
-                        <td>
-                            <span class="badge bg-<?= $project['status'] === 'em_andamento' ? 'info' : ($project['status'] === 'concluido' ? 'success' : 'warning') ?>">
-                                <?= $project['status'] === 'em_andamento' ? 'Em Andamento' : ($project['status'] === 'concluido' ? 'Concluído' : 'Pendente') ?>
-                            </span>
-                        </td>
-                        <td><?= date('d/m/Y', strtotime($project['created_at'])) ?></td>
+                        <td><a href="#" class="project-name"><?= htmlspecialchars($project['name']) ?></a></td>
+                        <td><?= htmlspecialchars($project['client']) ?></td>
+                        <td><span class="status-badge"><?= htmlspecialchars($project['status']) ?></span></td>
+                        <td><?= htmlspecialchars($project['updated']) ?></td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
         </div>
-    <?php else: ?>
-        <div class="text-center py-5">
-            <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
-            <p class="text-muted">Nenhum projeto encontrado</p>
-            <a href="/projects/create" class="btn btn-primary">
-                <i class="fas fa-plus me-2"></i>Criar Projeto
-            </a>
-        </div>
-    <?php endif; ?>
-</div>
-
-<?php if (!empty($recentDocuments)): ?>
-<div class="content-section">
-    <div class="section-title">Documentos Recentes</div>
-    
-    <div class="row">
-        <?php foreach ($recentDocuments as $document): ?>
-            <div class="col-md-6 col-lg-4 mb-3">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="d-flex align-items-start">
-                            <div class="me-3">
-                                <i class="fas fa-file-pdf fa-2x text-danger"></i>
-                            </div>
-                            <div class="flex-grow-1">
-                                <h6 class="card-title"><?= htmlspecialchars($document['name'] ?? 'Documento') ?></h6>
-                                <p class="card-text text-muted small">
-                                    <?= date('d/m/Y H:i', strtotime($document['created_at'])) ?>
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-footer bg-transparent">
-                        <small class="text-muted">
-                            <?= $formatBytes($document['size'] ?? 0) ?>
-                        </small>
-                    </div>
-                </div>
-            </div>
-        <?php endforeach; ?>
     </div>
 </div>
-<?php endif; ?>
 
 <?php
 $content = ob_get_clean();

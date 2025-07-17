@@ -1,0 +1,80 @@
+=== 2025-07-16 21:08:26 ===
+POST: Array
+(
+    [name] => criando tamplate na host
+    [description] => criando tamplate na host
+    [project_type] => industrial
+    [active] => 1
+    [required_documents] => Array
+        (
+            [0] => rg
+        )
+
+    [optional_documents] => Array
+        (
+            [0] => cpf
+            [1] => cnpj
+            [2] => escritura
+            [3] => art_rrt
+            [4] => memorial_descritivo
+            [5] => projeto_arquitetonico
+            [6] => projeto_hidraulico
+            [7] => projeto_eletrico
+        )
+
+)
+
+================
+
+=== 2025-07-17 13:57:17 ===
+POST: Array
+(
+    [name] => Laudo de exigências
+    [description] => Aprovação de projeto no CBMERJ
+    [project_type] => comercial
+    [active] => 1
+    [required_documents] => Array
+        (
+            [0] => rg
+            [1] => cnpj
+            [2] => contrato_social
+        )
+
+)
+
+================
+
+=== 2025-07-17 16:28:17 ===
+POST: Array
+(
+    [name] => Teste criaçao modificada
+    [description] => Teste criaçao modificada
+    [project_type] => comercial
+    [active] => 1
+    [custom_required_documents] => Array
+        (
+            [0] => CNH DIGITAL
+            [1] => LAUDO MODIFICADO
+        )
+
+    [custom_optional_documents] => Array
+        (
+            [0] => 
+        )
+
+    [required_documents] => Array
+        (
+            [0] => cpf
+            [1] => rg
+        )
+
+    [optional_documents] => Array
+        (
+            [0] => art_rrt
+            [1] => projeto_eletrico
+        )
+
+)
+
+================
+

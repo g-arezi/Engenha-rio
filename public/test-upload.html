@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste Upload</title>
+</head>
+<body>
+    <h1>Teste de Upload</h1>
+    
+    <form id="testForm">
+        <div>
+            <label>Tipo de Documento:</label>
+            <select name="document_type" required>
+                <option value="">Selecione...</option>
+                <option value="cpf">CPF</option>
+                <option value="rg">RG</option>
+                <option value="contrato">Contrato Social</option>
+            </select>
+        </div>
+        <br>
+        <div>
+            <label>Arquivo:</label>
+            <input type="file" name="file" required>
+        </div>
+        <br>
+        <div>
+            <label>Nome:</label>
+            <input type="text" name="name">
+        </div>
+        <br>
+        <div>
+            <label>Descrição:</label>
+            <textarea name="description"></textarea>
+        </div>
+        <br>
+        <button type="button" onclick="testarUpload()">Enviar</button>
+    </form>
+    
+    <div id="resultado"></div>
+    
+    <script>
+        function testarUpload() {
+            const form = document.getElementById('testForm');
+            const formData = new FormData(form);
+            formData.append('project_id', 'project_002'); // ID de projeto de teste
+            
+            console.log('Enviando dados:');
+            for (let [key, value] of formData.entries()) {
+                console.log(key, value);
+            }
+            
+            fetch('/documents/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                console.log('Status:', response.status);
+                return response.text();
+            })
+            .then(text => {
+                console.log('Response:', text);
+                document.getElementById('resultado').innerHTML = '<pre>' + text + '</pre>';
+                try {
+                    const json = JSON.parse(text);
+                    if (json.success) {
+                        alert('Upload realizado com sucesso!');
+                    } else {
+                        alert('Erro: ' + json.message);
+                    }
+                } catch (e) {
+                    alert('Resposta não é JSON válido');
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro na requisição');
+            });
+        }
+    </script>
+</body>
+</html>

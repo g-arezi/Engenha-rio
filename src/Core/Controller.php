@@ -36,9 +36,20 @@ class Controller
     
     protected function json($data, $status = 200)
     {
+        // Limpar qualquer output anterior
+        if (ob_get_level()) {
+            ob_clean();
+        }
+        
         http_response_code($status);
         header('Content-Type: application/json');
+        header('Cache-Control: no-cache, must-revalidate');
         echo json_encode($data);
+        
+        if (function_exists('fastcgi_finish_request')) {
+            fastcgi_finish_request();
+        }
+        
         exit;
     }
     

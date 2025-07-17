@@ -7,8 +7,11 @@ ob_start();
 <div class="login-container">
     <div class="login-card">
         <div class="login-header">
-            <img src="/assets/images/engenhario-logo-new.png" alt="Engenha Rio" class="logo" style="width: 200px; height: auto; display: block; margin: 0 auto 15px;">
+            <img src="/assets/images/engenhario-logo-new.png" alt="Engenha Rio" class="logo" style="width: 160px; height: auto; display: block; margin: 0 auto 20px; object-fit: contain;">
             <p>Sistema de Gestão de Documentos</p>
+            <div class="info-message" style="background: #e7f3ff; color: #0066cc; padding: 10px; border-radius: 5px; margin: 15px 0; font-size: 14px;">
+                <i class="fas fa-info-circle"></i> Todos os novos usuários são registrados como <strong>Cliente</strong>. Para alterar permissões, entre em contato com um administrador.
+            </div>
         </div>
         
         <form method="POST" action="/register" class="login-form">
@@ -55,23 +58,8 @@ ob_start();
                 <?php endif; ?>
             </div>
             
-            <div class="input-group">
-                <label for="role">
-                    <i class="fas fa-users"></i>
-                    Tipo de Usuário
-                </label>
-                <select id="role" name="role" required>
-                    <option value="">Selecione...</option>
-                    <option value="cliente" <?= (\App\Core\Session::get('old')['role'] ?? '') === 'cliente' ? 'selected' : '' ?>>Cliente</option>
-                    <option value="analista" <?= (\App\Core\Session::get('old')['role'] ?? '') === 'analista' ? 'selected' : '' ?>>Analista</option>
-                    <option value="admin" <?= (\App\Core\Session::get('old')['role'] ?? '') === 'admin' ? 'selected' : '' ?>>Administrador</option>
-                </select>
-                <?php if ($errors = \App\Core\Session::get('errors')): ?>
-                    <?php if (isset($errors['role'])): ?>
-                        <div class="error-message"><?= $errors['role'] ?></div>
-                    <?php endif; ?>
-                <?php endif; ?>
-            </div>
+            <!-- Campo oculto para definir o tipo como cliente automaticamente -->
+            <input type="hidden" name="role" value="cliente">
             
             <button type="submit" class="btn-login">
                 <i class="fas fa-user-plus"></i>
@@ -127,13 +115,16 @@ ob_start();
     
     .login-header {
         margin-bottom: 30px;
+        padding: 10px 0;
     }
     
     .logo {
-        width: 80px;
+        width: 160px;
         height: auto;
-        margin-bottom: 15px;
-        border-radius: 10px;
+        margin-bottom: 20px;
+        border-radius: 0;
+        object-fit: contain;
+        max-width: 100%;
     }
     
     .login-header h1 {
@@ -176,12 +167,15 @@ ob_start();
         width: 100%;
         padding: 15px;
         border: none;
-        border-radius: 10px;
+        border-radius: 10px !important;
         background: #34495e;
         color: white;
         font-size: 16px;
         transition: all 0.3s ease;
         box-sizing: border-box;
+        -webkit-border-radius: 10px !important;
+        -moz-border-radius: 10px !important;
+        -webkit-appearance: none;
     }
     
     .input-group input:focus,
@@ -189,6 +183,18 @@ ob_start();
         outline: none;
         background: #3f5468;
         box-shadow: 0 0 0 2px #6c757d;
+        border-radius: 10px !important;
+    }
+    
+    /* Garantir que todos os inputs tenham bordas arredondadas */
+    input[type="email"], 
+    input[type="password"], 
+    input[type="text"],
+    select {
+        border-radius: 10px !important;
+        -webkit-border-radius: 10px !important;
+        -moz-border-radius: 10px !important;
+        -webkit-appearance: none;
     }
     
     .input-group select {

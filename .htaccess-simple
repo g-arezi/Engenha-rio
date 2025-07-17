@@ -1,0 +1,21 @@
+RewriteEngine On
+
+# Permitir acesso aos arquivos estáticos
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+# Permitir acesso aos diretórios
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Redirecionar tudo para index.php
+RewriteRule ^(.*)$ index.php [QSA,L]
+
+# Configurações básicas de segurança
+Options -Indexes
+DirectoryIndex index.php
+
+# Permitir acesso aos recursos necessários
+<FilesMatch "\.(css|js|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|php)$">
+    Require all granted
+</FilesMatch>

@@ -8,18 +8,21 @@ use App\Core\Session;
 use App\Models\Project;
 use App\Models\User;
 use App\Models\Document;
+use App\Models\DocumentTemplate;
 
 class ProjectController extends Controller
 {
     private $projectModel;
     private $userModel;
     private $documentModel;
+    private $documentTemplateModel;
     
     public function __construct()
     {
         $this->projectModel = new Project();
         $this->userModel = new User();
         $this->documentModel = new Document();
+        $this->documentTemplateModel = new DocumentTemplate();
     }
     
     public function index()
@@ -37,6 +40,15 @@ class ProjectController extends Controller
             // Para clientes, usar o método específico getByClient
             $userProjects = $this->projectModel->getByClient($user['id'] ?? '') ?? [];
             $projects = $status ? array_filter($userProjects, fn($p) => ($p['status'] ?? '') === $status) : $userProjects;
+        }
+        
+        // Se for requisição AJAX, retornar JSON
+        if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+            $this->jsonResponse([
+                'success' => true,
+                'projects' => array_values($projects)
+            ]);
+            return;
         }
         
         $this->view('projects.index', [
@@ -78,7 +90,8 @@ class ProjectController extends Controller
             'name' => 'required|min:3',
             'description' => 'required|min:10',
             'deadline' => 'required',
-            'client_id' => 'required'
+            'client_id' => 'required',
+            'project_type' => 'required'
         ]);
         
         if (!empty($errors)) {
@@ -96,13 +109,26 @@ class ProjectController extends Controller
             return;
         }
         
+        // Se for um analista criando o projeto, automaticamente ele será o analista responsável
+        // A menos que ele tenha especificado outro analista
+        $analystId = null;
+        if (Auth::isAnalyst()) {
+            // Analista criando: se não especificou outro analista, ele será o responsável
+            $analystId = (!empty($data['analyst_id']) && $data['analyst_id'] !== '') ? $data['analyst_id'] : $user['id'];
+        } else {
+            // Admin criando: usa o analista especificado ou deixa null
+            $analystId = (!empty($data['analyst_id']) && $data['analyst_id'] !== '') ? $data['analyst_id'] : null;
+        }
+
         $projectData = [
             'name' => $data['name'],
             'description' => $data['description'],
             'deadline' => $data['deadline'],
             'user_id' => $user['id'],
             'client_id' => $data['client_id'], // Cliente obrigatório
-            'analyst_id' => $data['analyst_id'] ?? null,
+            'analyst_id' => $analystId,
+            'project_type' => $data['project_type'],
+            'document_template_id' => !empty($data['document_template_id']) ? $data['document_template_id'] : null,
             'status' => 'aguardando',
             'priority' => $data['priority'] ?? 'normal'
         ];
@@ -160,10 +186,17 @@ class ProjectController extends Controller
             }
         }
         
+        // Buscar template do projeto se existir
+        $template = null;
+        if (!empty($project['document_template_id'])) {
+            $template = $this->documentTemplateModel->getWithDocuments($project['document_template_id']);
+        }
+        
         $this->view('projects.show', [
             'project' => $project,
             'user' => $user,
             'documents' => $documents,
+            'template' => $template,
             'isAdmin' => Auth::isAdmin(),
             'isAnalyst' => Auth::isAnalyst(),
             'canUpload' => Auth::canUploadToProject($id)
@@ -172,47 +205,86 @@ class ProjectController extends Controller
     
     public function update($id)
     {
-        $project = $this->projectModel->find($id);
-        
-        if (!$project) {
-            $this->json(['error' => 'Projeto não encontrado'], 404);
+        // Verificar se o usuário pode editar projetos
+        if (!Auth::canEditProjects()) {
+            Session::flash('error', 'Acesso negado. Apenas administradores e analistas podem editar projetos.');
+            $this->redirect('/projects');
             return;
         }
         
-        // Apenas admin e analista podem atualizar projetos
-        if (!Auth::canManageProjects()) {
-            $this->json(['error' => 'Acesso negado. Apenas administradores e analistas podem atualizar projetos.'], 403);
+        $project = $this->projectModel->find($id);
+        
+        if (!$project) {
+            Session::flash('error', 'Projeto não encontrado');
+            $this->redirect('/projects');
             return;
         }
         
         $user = Auth::user();
         
-        $data = $_POST;
+        // Verificar permissões específicas do projeto
+        $canEdit = false;
+        if (Auth::isAdmin()) {
+            $canEdit = true;
+        } elseif (Auth::isAnalyst() && $project['analyst_id'] === $user['id']) {
+            $canEdit = true;
+        }
         
+        if (!$canEdit) {
+            Session::flash('error', 'Você não tem permissão para editar este projeto');
+            $this->redirect('/projects/' . $id);
+            return;
+        }
+        
+        $data = $_POST;
         $updateData = [];
         
-        if (isset($data['status']) && Auth::can('update_projects')) {
+        // Campos que admin e analista podem editar
+        if (isset($data['name'])) {
+            $updateData['name'] = trim($data['name']);
+        }
+        
+        if (isset($data['description'])) {
+            $updateData['description'] = trim($data['description']);
+        }
+        
+        if (isset($data['status'])) {
             $updateData['status'] = $data['status'];
         }
         
-        if (isset($data['notes']) && (Auth::isAdmin() || Auth::isAnalyst())) {
-            $updateData['notes'] = $data['notes'];
+        if (isset($data['priority'])) {
+            $updateData['priority'] = $data['priority'];
         }
         
-        if (isset($data['name']) && $project['user_id'] === $user['id']) {
-            $updateData['name'] = $data['name'];
+        if (isset($data['deadline'])) {
+            $updateData['deadline'] = $data['deadline'];
         }
         
-        if (isset($data['description']) && $project['user_id'] === $user['id']) {
-            $updateData['description'] = $data['description'];
+        if (isset($data['notes'])) {
+            $updateData['notes'] = trim($data['notes']);
         }
+        
+        // Validar campos obrigatórios
+        if (isset($updateData['name']) && empty($updateData['name'])) {
+            Session::flash('error', 'Nome do projeto é obrigatório');
+            $this->redirect('/projects/' . $id . '/edit');
+            return;
+        }
+        
+        if (isset($updateData['description']) && strlen($updateData['description']) < 10) {
+            Session::flash('error', 'Descrição deve ter pelo menos 10 caracteres');
+            $this->redirect('/projects/' . $id . '/edit');
+            return;
+        }
+        
+        $updateData['updated_at'] = date('Y-m-d H:i:s');
         
         if ($this->projectModel->update($id, $updateData)) {
             Session::flash('success', 'Projeto atualizado com sucesso!');
             $this->redirect('/projects/' . $id);
         } else {
             Session::flash('error', 'Erro ao atualizar projeto');
-            $this->redirect('/projects/' . $id);
+            $this->redirect('/projects/' . $id . '/edit');
         }
     }
     
@@ -247,17 +319,28 @@ class ProjectController extends Controller
             return;
         }
         
-        // Apenas admin e analista podem validar/atualizar status de projetos
-        if (!Auth::canManageProjects()) {
-            $this->json(['success' => false, 'message' => 'Acesso negado. Apenas administradores e analistas podem validar projetos.'], 403);
-            return;
-        }
-        
         $input = json_decode(file_get_contents('php://input'), true);
         $status = $input['status'] ?? $_POST['status'] ?? null;
         
         if (!$status) {
             $this->json(['success' => false, 'message' => 'Status é obrigatório'], 400);
+            return;
+        }
+        
+        // Verificar permissões específicas baseadas no status
+        if ($status === 'aprovado' && !Auth::canApproveProjects()) {
+            $this->json(['success' => false, 'message' => 'Acesso negado. Apenas administradores e analistas podem aprovar projetos.'], 403);
+            return;
+        }
+        
+        if ($status === 'concluido' && !Auth::canCompleteProjects()) {
+            $this->json(['success' => false, 'message' => 'Acesso negado. Apenas administradores e analistas podem concluir projetos.'], 403);
+            return;
+        }
+        
+        // Para outros status, verificar se pode alterar status de projetos
+        if (!Auth::canChangeProjectStatus()) {
+            $this->json(['success' => false, 'message' => 'Acesso negado. Apenas administradores e analistas podem alterar o status de projetos.'], 403);
             return;
         }
         
@@ -287,25 +370,44 @@ class ProjectController extends Controller
         
         // Verificar permissões
         $user = Auth::user();
-        if (!Auth::isAdmin() && !Auth::isAnalyst()) {
-            if ($project['user_id'] !== $user['id']) {
-                $_SESSION['project_message'] = 'Você não tem permissão para editar este projeto';
-                $_SESSION['project_success'] = false;
-                header('Location: /projects');
-                exit;
-            }
+        $canEdit = false;
+        
+        if (Auth::isAdmin()) {
+            $canEdit = true;
+        } elseif (Auth::isAnalyst() && ($project['analyst_id'] ?? null) === $user['id']) {
+            $canEdit = true;
+        } elseif (($project['user_id'] ?? null) === $user['id'] || ($project['client_id'] ?? null) === $user['id']) {
+            $canEdit = true;
+        }
+        
+        if (!$canEdit) {
+            $_SESSION['project_message'] = 'Você não tem permissão para editar este projeto';
+            $_SESSION['project_success'] = false;
+            header('Location: /projects/' . $id);
+            exit;
         }
         
         // Buscar informações adicionais se necessário
         $userModel = new \App\Models\User();
-        if (isset($project['user_id'])) {
+        
+        // Buscar informações do cliente
+        if (isset($project['client_id']) && $project['client_id']) {
+            $client = $userModel->find($project['client_id']);
+            $project['client_name'] = $client ? $client['name'] : 'Cliente não encontrado';
+        } elseif (isset($project['user_id']) && $project['user_id']) {
+            // Fallback para user_id como cliente
             $client = $userModel->find($project['user_id']);
-            $project['client_name'] = $client ? $client['name'] : 'N/A';
+            $project['client_name'] = $client ? $client['name'] : 'Cliente não encontrado';
+        } else {
+            $project['client_name'] = 'N/A';
         }
         
-        if (isset($project['analyst_id'])) {
+        // Buscar informações do analista
+        if (isset($project['analyst_id']) && $project['analyst_id']) {
             $analyst = $userModel->find($project['analyst_id']);
-            $project['analyst_name'] = $analyst ? $analyst['name'] : 'N/A';
+            $project['analyst_name'] = $analyst ? $analyst['name'] : 'Analista não encontrado';
+        } else {
+            $project['analyst_name'] = 'N/A';
         }
         
         $data = [
@@ -314,5 +416,82 @@ class ProjectController extends Controller
         ];
         
         $this->view('projects.edit', $data);
+    }
+    
+    /**
+     * Página de upload de documentos do projeto
+     */
+    public function documentsUpload($id)
+    {
+        $project = $this->projectModel->getWithDocumentTemplate($id);
+        
+        if (!$project) {
+            Session::flash('error', 'Projeto não encontrado');
+            $this->redirect('/projects');
+            return;
+        }
+        
+        $user = Auth::user();
+        
+        // Verificar se o usuário tem acesso ao projeto
+        $hasAccess = false;
+        if (Auth::isAdmin()) {
+            $hasAccess = true;
+        } elseif (Auth::isAnalyst() && $project['analyst_id'] === $user['id']) {
+            $hasAccess = true;
+        } elseif ($project['user_id'] === $user['id']) {
+            $hasAccess = true;
+        } elseif (isset($project['client_id']) && $project['client_id'] === $user['id']) {
+            $hasAccess = true;
+        }
+        
+        if (!$hasAccess) {
+            Session::flash('error', 'Você não tem permissão para acessar este projeto');
+            $this->redirect('/projects');
+            return;
+        }
+        
+        // Buscar documentos já enviados
+        $documentModel = new \App\Models\Document();
+        $uploadedDocuments = $documentModel->getByProject($id);
+        
+        $data = [
+            'project' => $project,
+            'uploadedDocuments' => $uploadedDocuments
+        ];
+        
+        // Se tem template, incluir dados do template e estatísticas
+        if (isset($project['document_template'])) {
+            $data['template'] = $project['document_template'];
+            $data['documentStats'] = $this->projectModel->getDocumentStats($id);
+        }
+        
+        $this->view('projects.documents_upload', $data);
+    }
+    
+    /**
+     * API para listar projetos (JSON)
+     */
+    public function apiList()
+    {
+        $user = Auth::user();
+        
+        if (Auth::isAdmin()) {
+            $projects = $this->projectModel->all();
+        } elseif (Auth::isAnalyst()) {
+            $projects = $this->projectModel->getByAnalyst($user['id'] ?? '') ?? [];
+        } else {
+            $projects = $this->projectModel->getByClient($user['id'] ?? '') ?? [];
+        }
+        
+        // Simplificar dados para o select
+        $simplifiedProjects = array_map(function($project) {
+            return [
+                'id' => $project['id'],
+                'name' => $project['name']
+            ];
+        }, $projects);
+        
+        $this->json($simplifiedProjects);
     }
 }

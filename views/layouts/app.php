@@ -77,7 +77,7 @@
         }
 
         .sidebar {
-            background: #1a1a1a;
+            background: #262626;
             min-height: 100vh;
             width: 240px;
             position: fixed;
@@ -247,15 +247,6 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-        }
-
-        .sidebar .nav-link.dropdown-toggle .fa-chevron-down {
-            transition: transform 0.3s ease;
-            font-size: 0.75rem;
-        }
-
-        .sidebar .nav-link.dropdown-toggle.show .fa-chevron-down {
-            transform: rotate(180deg);
         }
 
         .main-content {
@@ -519,19 +510,12 @@
                         Projetos
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link <?= $activeMenu === 'documents' ? 'active' : '' ?>" href="/documents">
-                        <i class="fas fa-file-alt"></i>
-                        Documentos
-                    </a>
-                </li>
                 
                 <?php if ($isAdmin || $isAnalyst): ?>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle <?= $activeMenu === 'admin' ? 'active' : '' ?>" href="#" id="adminDropdown" role="button" aria-expanded="false">
                         <i class="fas fa-cogs"></i>
                         Administração
-                        <i class="fas fa-chevron-down ms-auto" style="font-size: 0.8rem;"></i>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-dark" style="display: none;">
                         <li><a class="dropdown-item" href="/admin">
@@ -544,6 +528,16 @@
                         <li><a class="dropdown-item" href="/admin/users">
                             <i class="fas fa-users"></i> Gerenciar Usuários
                         </a></li>
+                        <?php endif; ?>
+                        <?php if ($isAdmin || $isAnalyst): ?>
+                        <li><a class="dropdown-item" href="/admin/document-templates">
+                            <i class="fas fa-file-text"></i> Templates
+                        </a></li>
+                        <?php endif; ?>
+                        <li><a class="dropdown-item" href="/tickets">
+                            <i class="fas fa-ticket-alt"></i> Gerenciar Tickets
+                        </a></li>
+                        <?php if ($isAdmin): ?>
                         <li><a class="dropdown-item" href="/admin/settings">
                             <i class="fas fa-cog"></i> Configurações
                         </a></li>
@@ -560,12 +554,6 @@
                         Perfil
                     </a>
                 </li>
-                <li class="nav-item mt-auto">
-                    <a class="nav-link text-warning" href="/logout">
-                        <i class="fas fa-sign-out-alt"></i>
-                        Sair
-                    </a>
-                </li>
             </ul>
         </nav>
     <?php endif; ?>
@@ -574,7 +562,7 @@
         <?php if (isset($showSidebar) && $showSidebar && !isset($hideTopBar)): ?>
             <div class="top-bar">
                 <div class="welcome-text">
-                    Dashboard
+                    <?= $pageTitle ?? $title ?? 'Dashboard' ?>
                 </div>
                 <div class="user-info">
                     <span class="badge bg-primary"><?= ucfirst($currentUser['role'] ?? 'Usuario') ?></span>
@@ -583,7 +571,6 @@
                     </div>
                     <div class="dropdown">
                         <button class="btn btn-link dropdown-toggle text-decoration-none" type="button" id="userDropdown" data-bs-toggle="dropdown">
-                            <i class="fas fa-chevron-down"></i>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="/profile"><i class="fas fa-user me-2"></i>Perfil</a></li>
@@ -612,10 +599,140 @@
     </main>
 
     <?php if (isset($showSidebar) && $showSidebar): ?>
-        <button class="chat-button" title="Chat de suporte">
+        <button class="chat-button" title="Chat de suporte" onclick="openTicketModal()">
             <i class="fas fa-comments"></i>
         </button>
+        
+        <!-- Modal de Tickets -->
+        <div class="modal fade" id="ticketModal" tabindex="-1" aria-labelledby="ticketModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="ticketModalLabel">
+                            <i class="fas fa-ticket-alt me-2"></i>Sistema de Suporte
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Aba para criar novo ticket -->
+                        <div id="newTicketTab">
+                            <h6 class="mb-3">Criar Novo Ticket</h6>
+                            <form id="ticketForm">
+                                <div class="mb-3">
+                                    <label for="ticketProject" class="form-label">Projeto <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="ticketProject" required>
+                                        <option value="">Selecione o projeto...</option>
+                                        <!-- Projetos serão carregados via JavaScript -->
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="ticketSubject" class="form-label">Assunto</label>
+                                    <input type="text" class="form-control" id="ticketSubject" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="ticketPriority" class="form-label">Prioridade</label>
+                                    <select class="form-select" id="ticketPriority">
+                                        <option value="baixa">Baixa</option>
+                                        <option value="media" selected>Média</option>
+                                        <option value="alta">Alta</option>
+                                        <option value="urgente">Urgente</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="ticketDescription" class="form-label">Descrição do problema</label>
+                                    <textarea class="form-control" id="ticketDescription" rows="4" required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane me-1"></i>Enviar Ticket
+                                </button>
+                                <button type="button" class="btn btn-secondary ms-2" onclick="showMyTickets()">
+                                    <i class="fas fa-list me-1"></i>Meus Tickets
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <!-- Aba para ver meus tickets -->
+                        <div id="myTicketsTab" style="display: none;">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="mb-0">Meus Tickets</h6>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="showNewTicketForm()">
+                                    <i class="fas fa-plus me-1"></i>Novo Ticket
+                                </button>
+                            </div>
+                            <div id="ticketsList">
+                                <!-- Lista de tickets será carregada via JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     <?php endif; ?>
+
+    <!-- Modal de Detalhes do Ticket para Usuário -->
+    <div class="modal fade" id="ticketDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-ticket-alt me-2"></i>
+                        Ticket #<span id="detailTicketId"></span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Detalhes do Ticket -->
+                    <div class="card mb-3">
+                        <div class="card-header d-flex justify-content-between">
+                            <div>
+                                <strong id="detailTicketSubject"></strong>
+                                <br>
+                                <small class="text-info">
+                                    <i class="fas fa-folder"></i> <span id="detailTicketProject"></span>
+                                </small>
+                                <br>
+                                <small class="text-muted">
+                                    Criado em: <span id="detailTicketDate"></span>
+                                </small>
+                            </div>
+                            <div>
+                                <span class="badge" id="detailTicketStatus"></span>
+                                <span class="badge ms-1" id="detailTicketPriority"></span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <strong>Descrição do problema:</strong>
+                            </div>
+                            <div id="detailTicketMessage" class="text-muted" style="white-space: pre-wrap;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Histórico de Respostas -->
+                    <div id="detailTicketResponses"></div>
+
+                    <!-- Formulário para Cliente Responder (se aplicável) -->
+                    <div id="clientResponseSection" class="card" style="display: none;">
+                        <div class="card-header">
+                            <strong>Adicionar Comentário</strong>
+                        </div>
+                        <div class="card-body">
+                            <form id="clientResponseForm">
+                                <div class="mb-3">
+                                    <textarea class="form-control" id="clientResponseMessage" rows="3" placeholder="Digite seu comentário..."></textarea>
+                                </div>
+                                <div class="text-end">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-reply me-1"></i>Enviar Comentário
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -673,6 +790,372 @@
                     });
                 }
             });
+            
+            // Sistema de Tickets
+            window.openTicketModal = function() {
+                new bootstrap.Modal(document.getElementById('ticketModal')).show();
+                showNewTicketForm();
+            }
+            
+            window.showNewTicketForm = function() {
+                document.getElementById('newTicketTab').style.display = 'block';
+                document.getElementById('myTicketsTab').style.display = 'none';
+                document.getElementById('ticketModalLabel').innerHTML = '<i class="fas fa-ticket-alt me-2"></i>Sistema de Suporte';
+                
+                // Carregar projetos do usuário
+                loadUserProjects();
+            }
+            
+            // Função para carregar projetos do usuário
+            function loadUserProjects() {
+                fetch('/projects', {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const projectSelect = document.getElementById('ticketProject');
+                    projectSelect.innerHTML = '<option value="">Selecione o projeto...</option>';
+                    
+                    if (data.success && data.projects) {
+                        data.projects.forEach(project => {
+                            const option = document.createElement('option');
+                            option.value = project.id;
+                            option.textContent = project.name;
+                            projectSelect.appendChild(option);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar projetos:', error);
+                });
+            }
+            
+            window.showMyTickets = function() {
+                document.getElementById('newTicketTab').style.display = 'none';
+                document.getElementById('myTicketsTab').style.display = 'block';
+                document.getElementById('ticketModalLabel').innerHTML = '<i class="fas fa-list me-2"></i>Meus Tickets';
+                loadMyTickets();
+            }
+            
+            function loadMyTickets() {
+                fetch('/api/tickets/my', {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displayTickets(data.tickets);
+                    } else {
+                        document.getElementById('ticketsList').innerHTML = '<div class="alert alert-danger">Erro ao carregar tickets</div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    document.getElementById('ticketsList').innerHTML = '<div class="alert alert-danger">Erro ao carregar tickets</div>';
+                });
+            }
+            
+            function displayTickets(tickets) {
+                const ticketsList = document.getElementById('ticketsList');
+                
+                if (tickets.length === 0) {
+                    ticketsList.innerHTML = '<div class="alert alert-info">Você ainda não possui tickets</div>';
+                    return;
+                }
+                
+                let html = '';
+                tickets.forEach(ticket => {
+                    const statusClass = getStatusClass(ticket.status);
+                    const priorityClass = getPriorityClass(ticket.priority);
+                    
+                    html += `
+                        <div class="card mb-2">
+                            <div class="card-body p-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="card-title mb-1">${ticket.subject}</h6>
+                                        ${ticket.project_name ? `<small class="text-info mb-1"><i class="fas fa-folder"></i> ${ticket.project_name}</small><br>` : ''}
+                                        <p class="card-text text-muted small mb-2">${ticket.description.substring(0, 100)}${ticket.description.length > 100 ? '...' : ''}</p>
+                                        <div class="d-flex gap-2">
+                                            <span class="badge ${statusClass}">${getStatusLabel(ticket.status)}</span>
+                                            <span class="badge ${priorityClass}">${getPriorityLabel(ticket.priority)}</span>
+                                        </div>
+                                    </div>
+                                    <div class="text-end">
+                                        <small class="text-muted">${formatDate(ticket.created_at)}</small>
+                                        <br>
+                                        <small class="text-muted">ID: ${ticket.id}</small>
+                                        ${ticket.responses && ticket.responses.length > 0 ? `<br><small class="badge bg-info">${ticket.responses.length} resposta(s)</small>` : ''}
+                                        <br>
+                                        <button class="btn btn-sm btn-outline-primary mt-1" onclick="viewTicketDetails('${ticket.id}')">
+                                            <i class="fas fa-eye"></i> Ver Detalhes
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                ticketsList.innerHTML = html;
+            }
+            
+            function getStatusClass(status) {
+                const classes = {
+                    'aberto': 'bg-warning',
+                    'em_andamento': 'bg-info',
+                    'resolvido': 'bg-success',
+                    'fechado': 'bg-secondary'
+                };
+                return classes[status] || 'bg-secondary';
+            }
+            
+            function getPriorityClass(priority) {
+                const classes = {
+                    'baixa': 'bg-light text-dark',
+                    'media': 'bg-primary',
+                    'alta': 'bg-warning text-dark',
+                    'urgente': 'bg-danger'
+                };
+                return classes[priority] || 'bg-primary';
+            }
+            
+            function getStatusLabel(status) {
+                const labels = {
+                    'aberto': 'Aberto',
+                    'em_andamento': 'Em Andamento',
+                    'resolvido': 'Resolvido',
+                    'fechado': 'Fechado'
+                };
+                return labels[status] || status;
+            }
+            
+            function getPriorityLabel(priority) {
+                const labels = {
+                    'baixa': 'Baixa',
+                    'media': 'Média',
+                    'alta': 'Alta',
+                    'urgente': 'Urgente'
+                };
+                return labels[priority] || priority;
+            }
+            
+            function formatDate(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleString('pt-BR');
+            }
+            
+            // Submit do formulário de ticket
+            const ticketForm = document.getElementById('ticketForm');
+            if (ticketForm) {
+                ticketForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const project = document.getElementById('ticketProject').value;
+                    const subject = document.getElementById('ticketSubject').value;
+                    const description = document.getElementById('ticketDescription').value;
+                    const priority = document.getElementById('ticketPriority').value;
+                    
+                    if (!project || !subject || !description) {
+                        alert('Por favor, preencha todos os campos obrigatórios');
+                        return;
+                    }
+                    
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Enviando...';
+                    submitBtn.disabled = true;
+                    
+                    fetch('/api/tickets/create', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({
+                            project_id: project,
+                            subject: subject,
+                            description: description,
+                            priority: priority
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Ticket criado com sucesso! ID: ' + data.ticketId);
+                            document.getElementById('ticketForm').reset();
+                            showMyTickets(); // Mostrar a lista de tickets
+                        } else {
+                            alert('Erro: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erro:', error);
+                        alert('Erro ao criar ticket');
+                    })
+                    .finally(() => {
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+                    });
+                });
+            }
+
+            // Função para ver detalhes do ticket
+            window.viewTicketDetails = function(ticketId) {
+                fetch(`/tickets/${ticketId}`, {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const ticket = data.ticket;
+                        
+                        // Preencher detalhes básicos
+                        document.getElementById('detailTicketId').textContent = ticket.id;
+                        document.getElementById('detailTicketSubject').textContent = ticket.subject;
+                        document.getElementById('detailTicketProject').textContent = ticket.project_name || 'Projeto não especificado';
+                        document.getElementById('detailTicketDate').textContent = new Date(ticket.created_at).toLocaleString('pt-BR');
+                        document.getElementById('detailTicketMessage').textContent = ticket.description;
+                        document.getElementById('detailTicketStatus').innerHTML = getStatusBadge(ticket.status);
+                        document.getElementById('detailTicketPriority').innerHTML = getPriorityBadge(ticket.priority);
+                        
+                        // Carregar respostas
+                        displayTicketResponses(ticket.responses || []);
+                        
+                        // Mostrar seção de resposta se ticket não estiver fechado
+                        const responseSection = document.getElementById('clientResponseSection');
+                        if (ticket.status !== 'fechado') {
+                            responseSection.style.display = 'block';
+                            setupClientResponseForm(ticket.id);
+                        } else {
+                            responseSection.style.display = 'none';
+                        }
+                        
+                        // Mostrar modal
+                        new bootstrap.Modal(document.getElementById('ticketDetailsModal')).show();
+                    } else {
+                        alert('Erro ao carregar ticket: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    alert('Erro ao carregar ticket');
+                });
+            };
+
+            // Função para exibir respostas do ticket
+            function displayTicketResponses(responses) {
+                const container = document.getElementById('detailTicketResponses');
+                
+                if (responses.length === 0) {
+                    container.innerHTML = '<div class="text-center text-muted py-3"><i class="fas fa-comments"></i><br>Nenhuma resposta ainda</div>';
+                    return;
+                }
+                
+                let html = '<h6 class="mb-3">Histórico de Conversas:</h6>';
+                
+                responses.forEach(response => {
+                    const date = new Date(response.created_at).toLocaleString('pt-BR');
+                    const roleClass = response.user_role === 'admin' ? 'text-danger' : 
+                                     response.user_role === 'analista' ? 'text-warning' : 'text-primary';
+                    const roleText = response.user_role === 'admin' ? '(Administrador)' : 
+                                    response.user_role === 'analista' ? '(Analista)' : '(Você)';
+                    
+                    html += `
+                        <div class="card mb-2">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <strong class="${roleClass}">
+                                        ${response.user_name} ${roleText}
+                                    </strong>
+                                    <small class="text-muted">${date}</small>
+                                </div>
+                                <div class="text-muted" style="white-space: pre-wrap;">${response.message}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                container.innerHTML = html;
+            }
+
+            // Função para configurar formulário de resposta do cliente
+            function setupClientResponseForm(ticketId) {
+                const form = document.getElementById('clientResponseForm');
+                
+                // Remove listeners anteriores
+                const newForm = form.cloneNode(true);
+                form.parentNode.replaceChild(newForm, form);
+                
+                // Adiciona novo listener
+                document.getElementById('clientResponseForm').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const message = document.getElementById('clientResponseMessage').value.trim();
+                    
+                    if (!message) {
+                        alert('Por favor, digite um comentário');
+                        return;
+                    }
+                    
+                    fetch(`/api/tickets/${ticketId}/respond`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({ message: message })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Comentário enviado com sucesso!');
+                            document.getElementById('clientResponseMessage').value = '';
+                            // Recarregar detalhes do ticket
+                            viewTicketDetails(ticketId);
+                        } else {
+                            alert('Erro ao enviar comentário: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erro:', error);
+                        alert('Erro ao enviar comentário');
+                    });
+                });
+            }
+
+            // Funções auxiliares para badges
+            function getStatusBadge(status) {
+                const badges = {
+                    'aberto': '<span class="badge bg-success">Aberto</span>',
+                    'em_andamento': '<span class="badge bg-warning">Em Andamento</span>',
+                    'resolvido': '<span class="badge bg-info">Resolvido</span>',
+                    'fechado': '<span class="badge bg-secondary">Fechado</span>'
+                };
+                return badges[status] || '<span class="badge bg-secondary">' + status + '</span>';
+            }
+
+            function getPriorityBadge(priority) {
+                const badges = {
+                    'baixa': '<span class="badge bg-light text-dark">Baixa</span>',
+                    'media': '<span class="badge bg-primary">Média</span>',
+                    'alta': '<span class="badge bg-warning">Alta</span>',
+                    'urgente': '<span class="badge bg-danger">Urgente</span>'
+                };
+                return badges[priority] || '<span class="badge bg-secondary">' + priority + '</span>';
+            }
         });
     </script>
 </body>

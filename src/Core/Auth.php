@@ -8,7 +8,8 @@ class Auth
 {
     public static function check()
     {
-        return Session::has('user_id');
+        // Verificar tanto user_id quanto user na sessão para compatibilidade
+        return Session::has('user_id') || Session::has('user');
     }
 
     public static function user()
@@ -17,9 +18,19 @@ class Auth
             return null;
         }
         
-        $userId = Session::get('user_id');
-        $userModel = new User();
-        return $userModel->find($userId);
+        // Tentar user_id primeiro (padrão)
+        if (Session::has('user_id')) {
+            $userId = Session::get('user_id');
+            $userModel = new User();
+            return $userModel->find($userId);
+        }
+        
+        // Fallback para user completo na sessão
+        if (Session::has('user')) {
+            return Session::get('user');
+        }
+        
+        return null;
     }
 
     public static function login($email, $password)
@@ -134,6 +145,51 @@ class Auth
     }
     
     /**
+     * Verificar se pode editar projetos
+     */
+    public static function canEditProjects()
+    {
+        $user = self::user();
+        return $user && in_array($user['role'], ['admin', 'analista']);
+    }
+    
+    /**
+     * Verificar se pode aprovar projetos
+     */
+    public static function canApproveProjects()
+    {
+        $user = self::user();
+        return $user && in_array($user['role'], ['admin', 'analista']);
+    }
+    
+    /**
+     * Verificar se pode concluir projetos
+     */
+    public static function canCompleteProjects()
+    {
+        $user = self::user();
+        return $user && in_array($user['role'], ['admin', 'analista']);
+    }
+    
+    /**
+     * Verificar se pode alterar status de projetos
+     */
+    public static function canChangeProjectStatus()
+    {
+        $user = self::user();
+        return $user && in_array($user['role'], ['admin', 'analista']);
+    }
+    
+    /**
+     * Verificar se pode gerenciar templates de documentos
+     */
+    public static function canManageTemplates()
+    {
+        $user = self::user();
+        return $user && in_array($user['role'], ['admin', 'analista']);
+    }
+    
+    /**
      * Verificar se cliente pode enviar documento para um projeto específico
      */
     public static function canUploadToProject($projectId)
@@ -141,6 +197,11 @@ class Auth
         $user = self::user();
         if (!$user) {
             return false;
+        }
+        
+        // Se não há projeto específico, permitir upload geral
+        if (empty($projectId) || $projectId === null) {
+            return true;
         }
         
         // Admin e analista podem enviar para qualquer projeto

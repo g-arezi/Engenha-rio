@@ -4,6 +4,16 @@ $showSidebar = true;
 $activeMenu = 'projects';
 ob_start();
 
+// Importar classe Auth para verificações de permissão
+use App\Core\Auth;
+
+// Verificar permissões do usuário
+$canEditProjects = Auth::canEditProjects();
+$canApproveProjects = Auth::canApproveProjects();
+$canCompleteProjects = Auth::canCompleteProjects();
+$isClient = Auth::isClient();
+$user = Auth::user();
+
 // Definir cores para status
 $statusColors = [
     'aguardando' => 'warning',
@@ -100,115 +110,287 @@ $statusTexts = [
             <div class="mb-3">
                 <label class="form-label fw-bold">Ações:</label>
                 <div class="d-flex gap-2">
-                    <?php if ($project['status'] !== 'concluido'): ?>
-                    <button class="btn btn-success" onclick="updateProjectStatus('<?= $project['id'] ?>', 'concluido')">
-                        <i class="fas fa-check me-1"></i>
-                        Concluir
-                    </button>
+                    <?php if (!$isClient): ?>
+                        <?php if ($project['status'] !== 'concluido' && $canCompleteProjects): ?>
+                        <button class="btn btn-success" onclick="updateProjectStatus('<?= $project['id'] ?>', 'concluido')">
+                            <i class="fas fa-check me-1"></i>
+                            Concluir
+                        </button>
+                        <?php endif; ?>
+                        
+                        <?php if ($project['status'] !== 'aprovado' && $canApproveProjects): ?>
+                        <button class="btn btn-primary" onclick="updateProjectStatus('<?= $project['id'] ?>', 'aprovado')">
+                            <i class="fas fa-thumbs-up me-1"></i>
+                            Aprovar
+                        </button>
+                        <?php endif; ?>
+                        
+                        <?php if ($canEditProjects): ?>
+                        <button class="btn btn-warning" onclick="editProject('<?= $project['id'] ?>')">
+                            <i class="fas fa-edit me-1"></i>
+                            Editar
+                        </button>
+                        
+                        <button class="btn btn-danger" onclick="deleteProject('<?= $project['id'] ?>')">
+                            <i class="fas fa-trash me-1"></i>
+                            Excluir
+                        </button>
+                        <?php endif; ?>
+                    <?php else: ?>
+                        <div class="alert alert-info mb-0 p-2">
+                            <i class="fas fa-info-circle me-1"></i>
+                            <small>Como cliente, você pode visualizar os dados do projeto e fazer upload de documentos abaixo.</small>
+                        </div>
                     <?php endif; ?>
-                    <?php if ($project['status'] !== 'aprovado'): ?>
-                    <button class="btn btn-primary" onclick="updateProjectStatus('<?= $project['id'] ?>', 'aprovado')">
-                        <i class="fas fa-thumbs-up me-1"></i>
-                        Aprovar
-                    </button>
-                    <?php endif; ?>
-                    <button class="btn btn-warning" onclick="editProject('<?= $project['id'] ?>')">
-                        <i class="fas fa-edit me-1"></i>
-                        Editar
-                    </button>
-                    <button class="btn btn-danger" onclick="deleteProject('<?= $project['id'] ?>')">
-                        <i class="fas fa-trash me-1"></i>
-                        Excluir
-                    </button>
                 </div>
             </div>
         </div>
         
         <div class="content-section">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="mb-0">📄 Documentos (<?= count($documents ?? []) ?>)</h5>
-                <?php if ($isAdmin || $isAnalyst || $project['client_id'] === $user['id'] || (isset($project['clients']) && in_array($user['id'], $project['clients']))): ?>
+                <h5 class="mb-0">📄 Documentos do Projeto</h5>
+                <?php 
+                // Verificar se pode fazer upload para este projeto
+                $canUpload = Auth::canUploadToProject($project['id']);
+                if ($canUpload): 
+                ?>
                 <button class="btn btn-primary" onclick="showUploadModal()">
                     <i class="fas fa-plus me-1"></i>
                     Upload
                 </button>
                 <?php endif; ?>
             </div>
-            
-            <?php if (!empty($documents)): ?>
-                <div class="row">
-                    <?php foreach ($documents as $document): ?>
-                        <div class="col-md-6 mb-3">
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center">
-                                        <div class="me-3">
-                                            <?php
-                                            $extension = strtolower(pathinfo($document['name'], PATHINFO_EXTENSION));
-                                            $iconClass = 'fas fa-file';
-                                            $iconColor = 'text-secondary';
-                                            
-                                            switch ($extension) {
-                                                case 'pdf':
-                                                    $iconClass = 'fas fa-file-pdf';
-                                                    $iconColor = 'text-danger';
-                                                    break;
-                                                case 'jpg':
-                                                case 'jpeg':
-                                                case 'png':
-                                                case 'gif':
-                                                    $iconClass = 'fas fa-file-image';
-                                                    $iconColor = 'text-success';
-                                                    break;
-                                                case 'doc':
-                                                case 'docx':
-                                                    $iconClass = 'fas fa-file-word';
-                                                    $iconColor = 'text-primary';
-                                                    break;
-                                                case 'xls':
-                                                case 'xlsx':
-                                                    $iconClass = 'fas fa-file-excel';
-                                                    $iconColor = 'text-success';
-                                                    break;
-                                                case 'dwg':
-                                                    $iconClass = 'fas fa-drafting-compass';
-                                                    $iconColor = 'text-warning';
-                                                    break;
-                                            }
-                                            ?>
-                                            <i class="<?= $iconClass ?> fa-2x <?= $iconColor ?>"></i>
+
+            <?php
+            // Template do projeto já vem do controller
+            // Documentos já enviados
+            $sentDocuments = $documents ?? [];
+            $sentDocTypes = array_column($sentDocuments, 'document_type');
+            ?>
+
+            <?php if ($template): ?>
+                <!-- Mostrar documentos baseados no template -->
+                <?php 
+                $requiredDocs = $template['required_documents'] ?? [];
+                $optionalDocs = $template['optional_documents'] ?? [];
+                $pendingRequired = array_filter($requiredDocs, function($doc) use ($sentDocTypes) {
+                    return !in_array($doc['type'], $sentDocTypes);
+                });
+                $pendingOptional = array_filter($optionalDocs, function($doc) use ($sentDocTypes) {
+                    return !in_array($doc['type'], $sentDocTypes);
+                });
+                ?>
+
+                <!-- Documentos Obrigatórios Pendentes -->
+                <?php if (!empty($pendingRequired)): ?>
+                    <div class="mb-4">
+                        <h6 class="text-danger">
+                            <i class="fas fa-exclamation-circle"></i> 
+                            Documentos Obrigatórios Pendentes (<?= count($pendingRequired) ?>)
+                        </h6>
+                        <div class="row">
+                            <?php foreach ($pendingRequired as $doc): ?>
+                                <div class="col-md-6 mb-2">
+                                    <div class="card border-danger">
+                                        <div class="card-body p-2">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h6 class="mb-0 text-danger">
+                                                        <?= htmlspecialchars($doc['name'] ?? $doc['label'] ?? 'Documento') ?>
+                                                    </h6>
+                                                    <small class="text-muted">
+                                                        <?= htmlspecialchars($doc['description'] ?? '') ?>
+                                                    </small>
+                                                </div>
+                                                <div>
+                                                    <span class="badge bg-danger me-2">Pendente</span>
+                                                    <?php if ($canUpload): ?>
+                                                        <button class="btn btn-sm btn-outline-primary" 
+                                                                onclick="openUploadForDocument('<?= htmlspecialchars($doc['type']) ?>', '<?= htmlspecialchars($doc['name'] ?? $doc['label'] ?? 'Documento') ?>')">
+                                                            <i class="fas fa-upload"></i>
+                                                        </button>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="flex-grow-1">
-                                            <h6 class="mb-1"><?= htmlspecialchars($document['name']) ?></h6>
-                                            <small class="text-muted">
-                                                Enviado em <?= date('d/m/Y H:i', strtotime($document['created_at'])) ?>
-                                                <?php if (isset($document['user_name'])): ?>
-                                                    por <?= htmlspecialchars($document['user_name']) ?>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
+                <!-- Documentos Opcionais Pendentes -->
+                <?php if (!empty($pendingOptional)): ?>
+                    <div class="mb-4">
+                        <h6 class="text-info">
+                            <i class="fas fa-info-circle"></i> 
+                            Documentos Opcionais Pendentes (<?= count($pendingOptional) ?>)
+                        </h6>
+                        <div class="row">
+                            <?php foreach ($pendingOptional as $doc): ?>
+                                <div class="col-md-6 mb-2">
+                                    <div class="card border-info">
+                                        <div class="card-body p-2">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h6 class="mb-0 text-info">
+                                                        <?= htmlspecialchars($doc['name'] ?? $doc['label'] ?? 'Documento') ?>
+                                                    </h6>
+                                                    <small class="text-muted">
+                                                        <?= htmlspecialchars($doc['description'] ?? '') ?>
+                                                    </small>
+                                                </div>
+                                                <div>
+                                                    <span class="badge bg-info me-2">Opcional</span>
+                                                    <?php if ($canUpload): ?>
+                                                        <button class="btn btn-sm btn-outline-primary" 
+                                                                onclick="openUploadForDocument('<?= htmlspecialchars($doc['type']) ?>', '<?= htmlspecialchars($doc['name'] ?? $doc['label'] ?? 'Documento') ?>')">
+                                                            <i class="fas fa-upload"></i>
+                                                        </button>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
+                <!-- Status dos documentos obrigatórios -->
+                <div class="alert alert-light mb-4">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <strong class="d-block"><?= count($requiredDocs) ?></strong>
+                            <small class="text-muted">Total obrigatórios</small>
+                        </div>
+                        <div class="col-4">
+                            <strong class="d-block text-danger"><?= count($pendingRequired) ?></strong>
+                            <small class="text-muted">Pendentes</small>
+                        </div>
+                        <div class="col-4">
+                            <strong class="d-block text-success"><?= count($requiredDocs) - count($pendingRequired) ?></strong>
+                            <small class="text-muted">Enviados</small>
+                        </div>
+                    </div>
+                    
+                    <?php if (count($pendingRequired) === 0): ?>
+                        <div class="text-center mt-2">
+                            <span class="badge bg-success">
+                                <i class="fas fa-check"></i> Todos os documentos obrigatórios foram enviados!
+                            </span>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
+
+            <!-- Documentos Enviados -->
+            <?php if (!empty($sentDocuments)): ?>
+                <div class="mb-4">
+                    <h6 class="text-success">
+                        <i class="fas fa-check-circle"></i> 
+                        Documentos Enviados (<?= count($sentDocuments) ?>)
+                    </h6>
+                    <div class="row">
+                        <?php foreach ($sentDocuments as $document): ?>
+                            <div class="col-md-6 mb-3">
+                                <div class="card border-success">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-3">
+                                                <?php
+                                                $extension = strtolower(pathinfo($document['name'], PATHINFO_EXTENSION));
+                                                $iconClass = 'fas fa-file';
+                                                $iconColor = 'text-secondary';
+                                                
+                                                switch ($extension) {
+                                                    case 'pdf':
+                                                        $iconClass = 'fas fa-file-pdf';
+                                                        $iconColor = 'text-danger';
+                                                        break;
+                                                    case 'jpg':
+                                                    case 'jpeg':
+                                                    case 'png':
+                                                    case 'gif':
+                                                        $iconClass = 'fas fa-file-image';
+                                                        $iconColor = 'text-success';
+                                                        break;
+                                                    case 'doc':
+                                                    case 'docx':
+                                                        $iconClass = 'fas fa-file-word';
+                                                        $iconColor = 'text-primary';
+                                                        break;
+                                                    case 'xls':
+                                                    case 'xlsx':
+                                                        $iconClass = 'fas fa-file-excel';
+                                                        $iconColor = 'text-success';
+                                                        break;
+                                                    case 'dwg':
+                                                        $iconClass = 'fas fa-drafting-compass';
+                                                        $iconColor = 'text-warning';
+                                                        break;
+                                                }
+                                                ?>
+                                                <i class="<?= $iconClass ?> fa-2x <?= $iconColor ?>"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-1"><?= htmlspecialchars($document['name']) ?></h6>
+                                                <?php if (!empty($document['document_type']) || !empty($document['type'])): ?>
+                                                    <span class="badge bg-success mb-1">
+                                                        <?php
+                                                        $docType = $document['document_type'] ?? $document['type'];
+                                                        if ($template) {
+                                                            // Buscar nome amigável no template
+                                                            $allDocs = array_merge($template['required_documents'] ?? [], $template['optional_documents'] ?? []);
+                                                            foreach ($allDocs as $templateDoc) {
+                                                                if ($templateDoc['type'] === $docType) {
+                                                                    echo htmlspecialchars($templateDoc['name'] ?? $templateDoc['label'] ?? $docType);
+                                                                    break;
+                                                                }
+                                                            }
+                                                        } else {
+                                                            echo htmlspecialchars($docType);
+                                                        }
+                                                        ?>
+                                                    </span>
+                                                    <br>
                                                 <?php endif; ?>
-                                            </small>
-                                        </div>
-                                        <div>
-                                            <button class="btn btn-sm btn-outline-primary" onclick="downloadDocument('<?= $document['id'] ?>')">
-                                                <i class="fas fa-download"></i>
-                                                Download
-                                            </button>
-                                            <?php if ($isAdmin || $document['user_id'] === $user['id']): ?>
-                                                <button class="btn btn-sm btn-outline-danger ms-1" onclick="deleteDocument('<?= $document['id'] ?>')">
-                                                    <i class="fas fa-trash"></i>
+                                                <small class="text-muted">
+                                                    Enviado em <?= date('d/m/Y H:i', strtotime($document['created_at'])) ?>
+                                                    <?php if (isset($document['user_name'])): ?>
+                                                        por <?= htmlspecialchars($document['user_name']) ?>
+                                                    <?php endif; ?>
+                                                </small>
+                                            </div>
+                                            <div>
+                                                <button class="btn btn-sm btn-outline-primary" onclick="downloadDocument('<?= $document['id'] ?>')">
+                                                    <i class="fas fa-download"></i>
+                                                    Download
                                                 </button>
-                                            <?php endif; ?>
+                                                <?php if (Auth::isAdmin() || $document['user_id'] === $user['id']): ?>
+                                                    <button class="btn btn-sm btn-outline-danger ms-1" onclick="deleteDocument('<?= $document['id'] ?>')">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                <?php endif; ?>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    <?php endforeach; ?>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
-            <?php else: ?>
+            <?php endif; ?>
+
+            <?php if (empty($sentDocuments) && (!$template || (empty($pendingRequired) && empty($pendingOptional)))): ?>
                 <div class="text-center py-4">
                     <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
                     <h6 class="text-muted">Nenhum documento encontrado</h6>
-                    <p class="text-muted">Faça upload dos primeiros documentos do projeto</p>
+                    <p class="text-muted">
+                        <?= $template ? 'Todos os documentos foram enviados!' : 'Faça upload dos primeiros documentos do projeto' ?>
+                    </p>
                 </div>
             <?php endif; ?>
         </div>
@@ -343,7 +525,7 @@ function updateProjectStatus(projectId, status) {
 }
 
 function editProject(projectId) {
-    showAlert('info', 'Funcionalidade de edição em desenvolvimento');
+    window.location.href = `/projects/${projectId}/edit`;
 }
 
 function deleteProject(projectId) {
@@ -414,15 +596,133 @@ function createAlertContainer() {
 function showUploadModal() {
     const modal = document.getElementById('uploadModal');
     if (modal) {
+        // Limpar formulário
+        resetUploadForm();
+        
         const bootstrapModal = new bootstrap.Modal(modal);
         bootstrapModal.show();
+        
+        // Configurar evento de mudança no tipo de documento
+        const documentTypeSelect = document.getElementById('documentType');
+        if (documentTypeSelect) {
+            documentTypeSelect.addEventListener('change', updateDocumentTypeInfo);
+        }
+    }
+}
+
+function resetUploadForm() {
+    const form = document.getElementById('uploadForm');
+    if (form) {
+        form.reset();
+    }
+    
+    const helpText = document.getElementById('documentTypeHelp');
+    if (helpText) {
+        helpText.innerHTML = 'Selecione o tipo de documento que você está enviando';
+        helpText.className = 'form-text';
+    }
+    
+    const fileHelp = document.getElementById('fileHelp');
+    if (fileHelp) {
+        fileHelp.innerHTML = 'Formatos aceitos: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG, DWG, TXT (máx. 10MB)';
+    }
+}
+
+function updateDocumentTypeInfo() {
+    const select = document.getElementById('documentType');
+    const selectedOption = select.selectedOptions[0];
+    const helpText = document.getElementById('documentTypeHelp');
+    const fileInput = document.getElementById('documentFile');
+    const fileHelp = document.getElementById('fileHelp');
+    const nameInput = document.getElementById('documentName');
+    
+    if (selectedOption && selectedOption.value !== '') {
+        const description = selectedOption.getAttribute('data-description');
+        const accept = selectedOption.getAttribute('data-accept');
+        
+        // Atualizar texto de ajuda
+        if (description) {
+            helpText.innerHTML = `<strong>Descrição:</strong> ${description}`;
+            helpText.className = 'form-text text-info';
+        } else {
+            helpText.innerHTML = 'Selecione o tipo de documento que você está enviando';
+            helpText.className = 'form-text';
+        }
+        
+        // Atualizar tipos de arquivo aceitos
+        if (accept) {
+            fileInput.setAttribute('accept', accept);
+            fileHelp.innerHTML = `Formatos aceitos: ${accept.toUpperCase().replace(/\./g, '').replace(/,/g, ', ')} (máx. 10MB)`;
+        } else {
+            fileInput.setAttribute('accept', '.pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.dwg,.txt');
+            fileHelp.innerHTML = 'Formatos aceitos: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG, DWG, TXT (máx. 10MB)';
+        }
+        
+        // Pré-preencher nome do documento se estiver vazio
+        if (!nameInput.value) {
+            nameInput.value = selectedOption.textContent.trim();
+        }
+    } else {
+        helpText.innerHTML = 'Selecione o tipo de documento que você está enviando';
+        helpText.className = 'form-text';
+        fileInput.setAttribute('accept', '.pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.dwg,.txt');
+        fileHelp.innerHTML = 'Formatos aceitos: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG, DWG, TXT (máx. 10MB)';
+    }
+}
+
+function openUploadForDocument(documentType, documentName) {
+    // Abrir modal
+    const modal = document.getElementById('uploadModal');
+    if (modal) {
+        // Limpar formulário primeiro
+        resetUploadForm();
+        
+        const bootstrapModal = new bootstrap.Modal(modal);
+        bootstrapModal.show();
+        
+        // Pré-selecionar o tipo de documento
+        setTimeout(() => {
+            const documentTypeSelect = document.getElementById('documentType');
+            const nameInput = document.getElementById('documentName');
+            
+            if (documentTypeSelect) {
+                documentTypeSelect.value = documentType;
+                documentTypeSelect.addEventListener('change', updateDocumentTypeInfo);
+                updateDocumentTypeInfo(); // Atualizar informações imediatamente
+            }
+            
+            if (nameInput && !nameInput.value) {
+                nameInput.value = documentName;
+            }
+        }, 100);
     }
 }
 
 function uploadDocument() {
     const form = document.getElementById('uploadForm');
+    
+    // Validar formulário
+    const fileInput = document.getElementById('documentFile');
+    const documentTypeInput = document.getElementById('documentType') || document.getElementById('documentTypeManual');
+    
+    if (!fileInput.files.length) {
+        showAlert('error', 'Por favor, selecione um arquivo');
+        return;
+    }
+    
+    if (documentTypeInput && !documentTypeInput.value) {
+        showAlert('error', 'Por favor, selecione o tipo de documento');
+        return;
+    }
+    
     const formData = new FormData(form);
     formData.append('project_id', '<?= $project['id'] ?>');
+    
+    // Debug - Verificar dados do formulário
+    console.log('Dados do formulário:');
+    for (let [key, value] of formData.entries()) {
+        console.log(key, value);
+    }
     
     // Mostrar loading
     const submitBtn = document.getElementById('submitUpload');
@@ -434,10 +734,28 @@ function uploadDocument() {
         method: 'POST',
         body: formData
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        return response.text().then(text => {
+            console.log('Response text:', text);
+            try {
+                return JSON.parse(text);
+            } catch (e) {
+                console.error('Erro ao fazer parse do JSON:', e);
+                throw new Error('Resposta não é um JSON válido: ' + text);
+            }
+        });
+    })
     .then(data => {
+        console.log('Response data:', data);
         if (data.success) {
             showAlert('success', 'Documento enviado com sucesso!');
+            // Fechar modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('uploadModal'));
+            if (modal) {
+                modal.hide();
+            }
             setTimeout(() => location.reload(), 1000);
         } else {
             showAlert('error', data.message || 'Erro ao enviar documento');
@@ -445,7 +763,7 @@ function uploadDocument() {
     })
     .catch(error => {
         console.error('Erro:', error);
-        showAlert('error', 'Erro ao enviar documento');
+        showAlert('error', 'Erro ao enviar documento: ' + error.message);
     })
     .finally(() => {
         submitBtn.innerHTML = originalText;
@@ -495,11 +813,66 @@ function deleteDocument(documentId) {
             </div>
             <div class="modal-body">
                 <form id="uploadForm" enctype="multipart/form-data">
+                    <?php if ($template): ?>
+                    <!-- Seleção do Tipo de Documento -->
+                    <div class="mb-3">
+                        <label for="documentType" class="form-label">Tipo de Documento *</label>
+                        <select class="form-select" id="documentType" name="document_type" required>
+                            <option value="">Selecione o tipo de documento</option>
+                            
+                            <?php if (!empty($template['required_documents'])): ?>
+                                <optgroup label="📋 Documentos Obrigatórios">
+                                    <?php foreach ($template['required_documents'] as $doc): ?>
+                                        <?php if (!in_array($doc['type'], $sentDocTypes)): ?>
+                                            <option value="<?= htmlspecialchars($doc['type']) ?>" 
+                                                    data-description="<?= htmlspecialchars($doc['description'] ?? '') ?>"
+                                                    data-accept="<?= htmlspecialchars($doc['accept'] ?? '') ?>">
+                                                <?= htmlspecialchars($doc['name'] ?? $doc['label'] ?? 'Documento') ?>
+                                            </option>
+                                        <?php endif; ?>
+                                    <?php endforeach; ?>
+                                </optgroup>
+                            <?php endif; ?>
+                            
+                            <?php if (!empty($template['optional_documents'])): ?>
+                                <optgroup label="📄 Documentos Opcionais">
+                                    <?php foreach ($template['optional_documents'] as $doc): ?>
+                                        <?php if (!in_array($doc['type'], $sentDocTypes)): ?>
+                                            <option value="<?= htmlspecialchars($doc['type']) ?>" 
+                                                    data-description="<?= htmlspecialchars($doc['description'] ?? '') ?>"
+                                                    data-accept="<?= htmlspecialchars($doc['accept'] ?? '') ?>">
+                                                <?= htmlspecialchars($doc['name'] ?? $doc['label'] ?? 'Documento') ?>
+                                            </option>
+                                        <?php endif; ?>
+                                    <?php endforeach; ?>
+                                </optgroup>
+                            <?php endif; ?>
+                            
+                            <optgroup label="📁 Outros Documentos">
+                                <option value="other">Outro documento não listado</option>
+                            </optgroup>
+                        </select>
+                        <div class="form-text" id="documentTypeHelp">
+                            Selecione o tipo de documento que você está enviando
+                        </div>
+                    </div>
+                    <?php else: ?>
+                    <!-- Caso não tenha template -->
+                    <div class="mb-3">
+                        <label for="documentTypeManual" class="form-label">Tipo de Documento</label>
+                        <input type="text" class="form-control" id="documentTypeManual" name="document_type" 
+                               placeholder="Digite o tipo do documento (ex: RG, CPF, Escritura...)">
+                        <div class="form-text">
+                            Informe o tipo/categoria do documento que está enviando
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                    
                     <div class="mb-3">
                         <label for="documentFile" class="form-label">Arquivo *</label>
                         <input type="file" class="form-control" id="documentFile" name="file" required 
                                accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.dwg,.txt">
-                        <div class="form-text">
+                        <div class="form-text" id="fileHelp">
                             Formatos aceitos: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG, DWG, TXT (máx. 10MB)
                         </div>
                     </div>

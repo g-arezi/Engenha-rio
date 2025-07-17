@@ -56,6 +56,11 @@ class Router
         $requestMethod = $_SERVER['REQUEST_METHOD'];
         $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         
+        // Suporte para _method override (PUT, DELETE via POST)
+        if ($requestMethod === 'POST' && isset($_POST['_method'])) {
+            $requestMethod = strtoupper($_POST['_method']);
+        }
+        
         // Debug logs
         error_log("Router Debug - Method: $requestMethod, URI: $requestUri");
         
@@ -95,6 +100,16 @@ class Router
         
         // Rota não encontrada
         error_log("Router Debug - No route found for: $requestMethod $requestUri");
+        error_log("Router Debug - Available routes:");
+        foreach ($this->routes as $route) {
+            error_log("  - " . $route['method'] . " " . $route['path']);
+        }
+        
+        // Se for uma requisição POST com _method, mostrar isso no debug
+        if (isset($_POST['_method'])) {
+            error_log("Router Debug - _method override detected: " . $_POST['_method']);
+        }
+        
         http_response_code(404);
         include __DIR__ . '/../../views/errors/404.php';
     }
@@ -111,14 +126,30 @@ class Router
     private function executeMiddleware($middleware)
     {
         error_log("Middleware Debug - Executing: $middleware");
+        error_log("Middleware Debug - Session status: " . session_status());
+        error_log("Middleware Debug - Session data: " . print_r($_SESSION, true));
         
         switch ($middleware) {
             case 'auth':
+                // Garantir que a sessão está iniciada
+                if (session_status() === PHP_SESSION_NONE) {
+                    session_start();
+                }
+                
                 $isAuthenticated = Auth::check();
                 error_log("Middleware Debug - Auth check result: " . ($isAuthenticated ? 'true' : 'false'));
                 
                 if (!$isAuthenticated) {
                     error_log("Middleware Debug - User not authenticated, redirecting to login");
+                    error_log("Middleware Debug - Current URI: " . $_SERVER['REQUEST_URI']);
+                    
+                    // Limpar qualquer output buffer
+                    if (ob_get_level()) {
+                        ob_clean();
+                    }
+                    
+                    // Definir headers de redirecionamento
+                    http_response_code(302);
                     header('Location: /login');
                     exit;
                 }
@@ -136,6 +167,19 @@ class Router
                     exit;
                 }
                 return $isAdmin;
+                
+            case 'manage_templates':
+                $user = Auth::user();
+                $canManage = Auth::check() && $user && isset($user['role']) && in_array($user['role'], ['admin', 'analista']);
+                error_log("Middleware Debug - Manage templates check result: " . ($canManage ? 'true' : 'false'));
+                
+                if (!$canManage) {
+                    error_log("Middleware Debug - User cannot manage templates, access denied");
+                    http_response_code(403);
+                    echo "Acesso negado. Apenas administradores e analistas podem gerenciar templates.";
+                    exit;
+                }
+                return $canManage;
                 
             default:
                 error_log("Middleware Debug - Unknown middleware: $middleware");

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug JavaScript</title>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+    <h1>Debug dos Inputs Hidden</h1>
+    
+    <form id="testForm" action="/admin/document-templates" method="POST">
+        <input type="text" name="name" value="Teste JS" required>
+        <select name="project_type" required>
+            <option value="residencial">Residencial</option>
+        </select>
+        <textarea name="description">Teste do JavaScript</textarea>
+        
+        <!-- Div para inputs hidden -->
+        <div id="hiddenInputs"></div>
+        
+        <button type="button" onclick="addHiddenInputs()">Adicionar Inputs Hidden</button>
+        <button type="button" onclick="showFormData()">Mostrar Dados do Form</button>
+        <button type="submit">Enviar</button>
+    </form>
+    
+    <div id="debug"></div>
+    
+    <script>
+    function addHiddenInputs() {
+        const hiddenDiv = document.getElementById('hiddenInputs');
+        hiddenDiv.innerHTML = '';
+        
+        // Simular documentos selecionados
+        const selectedRequired = ['rg', 'cpf'];
+        const selectedOptional = ['escritura'];
+        
+        // Adicionar documentos obrigatórios
+        selectedRequired.forEach(docId => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'required_documents[]';
+            input.value = docId;
+            hiddenDiv.appendChild(input);
+            console.log('Added required:', docId);
+        });
+        
+        // Adicionar documentos opcionais
+        selectedOptional.forEach(docId => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'optional_documents[]';
+            input.value = docId;
+            hiddenDiv.appendChild(input);
+            console.log('Added optional:', docId);
+        });
+        
+        document.getElementById('debug').innerHTML = '<h3>Inputs Hidden Adicionados:</h3><pre>' + hiddenDiv.innerHTML + '</pre>';
+    }
+    
+    function showFormData() {
+        const form = document.getElementById('testForm');
+        const formData = new FormData(form);
+        
+        let output = '<h3>Dados do Formulário:</h3><ul>';
+        for (let [key, value] of formData.entries()) {
+            output += `<li><strong>${key}:</strong> ${value}</li>`;
+        }
+        output += '</ul>';
+        
+        document.getElementById('debug').innerHTML = output;
+    }
+    </script>
+</body>
+</html>

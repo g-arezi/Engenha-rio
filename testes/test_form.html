@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Form Submission</title>
+</head>
+<body>
+    <h1>Teste de Envio do Formulário</h1>
+    
+    <form action="/admin/document-templates" method="POST">
+        <label>Nome:</label>
+        <input type="text" name="name" value="Template Teste Manual" required><br><br>
+        
+        <label>Descrição:</label>
+        <textarea name="description">Teste manual do formulário</textarea><br><br>
+        
+        <label>Tipo de Projeto:</label>
+        <select name="project_type" required>
+            <option value="residencial">Residencial</option>
+        </select><br><br>
+        
+        <label>Documentos Obrigatórios:</label><br>
+        <input type="checkbox" name="required_documents[]" value="rg" checked> RG<br>
+        <input type="checkbox" name="required_documents[]" value="cpf" checked> CPF<br><br>
+        
+        <label>Documentos Opcionais:</label><br>
+        <input type="checkbox" name="optional_documents[]" value="escritura"> Escritura<br><br>
+        
+        <button type="submit">Criar Template</button>
+    </form>
+    
+    <h2>Debug Info</h2>
+    <pre>
+    <?php
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        echo "POST Data:\n";
+        print_r($_POST);
+        
+        echo "\nRequired Docs:\n";
+        var_dump($_POST['required_documents'] ?? 'não definido');
+        
+        echo "\nOptional Docs:\n";
+        var_dump($_POST['optional_documents'] ?? 'não definido');
+    }
+    ?>
+    </pre>
+</body>
+</html>

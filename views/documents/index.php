@@ -1,24 +1,11 @@
 <?php 
 $title = 'Documentos - Engenha Rio';
+$pageTitle = 'Documentos';
 $showSidebar = true;
 $activeMenu = 'documents';
+$hideTopBar = true;  // Remove a top-bar para evitar duplicidade
 ob_start();
 ?>
-
-<div class="row">
-    <div class="col-12 mb-4">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <h2 class="h4 mb-0">📄 Documentos</h2>
-                <p class="text-muted">Gerencie todos os documentos do sistema</p>
-            </div>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadModal">
-                <i class="fas fa-upload me-1"></i>
-                Novo Upload
-            </button>
-        </div>
-    </div>
-</div>
 
 <!-- Filtros -->
 <div class="row mb-4">
@@ -26,7 +13,7 @@ ob_start();
         <div class="card shadow-sm">
             <div class="card-body">
                 <div class="row g-3">
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label class="form-label fw-bold">🔍 Buscar documentos</label>
                         <div class="input-group">
                             <span class="input-group-text bg-light border-end-0">
@@ -45,7 +32,7 @@ ob_start();
                             <option value="outros">Outros</option>
                         </select>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label class="form-label fw-bold">🏗️ Projeto</label>
                         <select class="form-select" id="projectFilter">
                             <option value="">Todos os projetos</option>
@@ -67,6 +54,15 @@ ob_start();
                             <i class="fas fa-times text-dark"></i>
                         </button>
                     </div>
+                    <?php if ($canUpload ?? true): ?>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">&nbsp;</label>
+                        <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                            <i class="fas fa-upload me-1"></i>
+                            Novo Upload
+                        </button>
+                    </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -173,12 +169,13 @@ ob_start();
                 <h5 class="modal-title"><i class="fas fa-upload"></i> Upload de Documento</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form action="/documents/upload" method="POST" enctype="multipart/form-data">
+            <form id="uploadForm" enctype="multipart/form-data">
                 <div class="modal-body">
+                    <div id="uploadAlert" class="alert d-none" role="alert"></div>
                     <div class="mb-3">
                         <label for="file" class="form-label">Arquivo *</label>
                         <input type="file" class="form-control" id="file" name="file" required>
-                        <small class="text-muted">Máximo 10MB. Formatos aceitos: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, JPG, PNG</small>
+                        <small class="text-muted">Máximo 50MB. Formatos aceitos: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, JPG, PNG, GIF, WEBP, TXT, ZIP, RAR</small>
                     </div>
                     <div class="mb-3">
                         <label for="name" class="form-label">Nome do Documento *</label>
@@ -208,7 +205,7 @@ ob_start();
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary" id="uploadBtn">
                         <i class="fas fa-upload"></i> Fazer Upload
                     </button>
                 </div>
@@ -329,6 +326,115 @@ function clearFilters() {
     document.getElementById('typeFilter').value = '';
     document.getElementById('projectFilter').value = '';
     filterDocuments();
+}
+
+// Carregar projetos no modal de upload
+document.addEventListener('DOMContentLoaded', function() {
+    loadProjects();
+    setupUploadForm();
+});
+
+function setupUploadForm() {
+    const uploadForm = document.getElementById('uploadForm');
+    const uploadModal = document.getElementById('uploadModal');
+    
+    if (uploadForm) {
+        uploadForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const uploadBtn = document.getElementById('uploadBtn');
+            const uploadAlert = document.getElementById('uploadAlert');
+            
+            // Mostrar loading
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+            
+            // Esconder alertas anteriores
+            uploadAlert.classList.add('d-none');
+            
+            fetch('/documents/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Mostrar sucesso
+                    uploadAlert.className = 'alert alert-success';
+                    uploadAlert.textContent = data.message || 'Documento enviado com sucesso!';
+                    uploadAlert.classList.remove('d-none');
+                    
+                    // Limpar formulário
+                    uploadForm.reset();
+                    
+                    // Fechar modal após 2 segundos
+                    setTimeout(() => {
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('uploadModal'));
+                        if (modal) {
+                            modal.hide();
+                        }
+                        // Recarregar a página para mostrar o novo documento
+                        window.location.reload();
+                    }, 2000);
+                } else {
+                    // Mostrar erro
+                    uploadAlert.className = 'alert alert-danger';
+                    uploadAlert.textContent = data.message || 'Erro ao enviar documento';
+                    uploadAlert.classList.remove('d-none');
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                uploadAlert.className = 'alert alert-danger';
+                uploadAlert.textContent = 'Erro interno do servidor';
+                uploadAlert.classList.remove('d-none');
+            })
+            .finally(() => {
+                // Restaurar botão
+                uploadBtn.disabled = false;
+                uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Fazer Upload';
+            });
+        });
+    }
+    
+    // Limpar formulário quando modal for fechado
+    if (uploadModal) {
+        uploadModal.addEventListener('hidden.bs.modal', function () {
+            if (uploadForm) {
+                uploadForm.reset();
+                const uploadAlert = document.getElementById('uploadAlert');
+                if (uploadAlert) {
+                    uploadAlert.classList.add('d-none');
+                }
+            }
+        });
+    }
+}
+
+function loadProjects() {
+    fetch('/api/projects')
+        .then(response => response.json())
+        .then(data => {
+            const projectSelect = document.getElementById('project_id');
+            const projectFilter = document.getElementById('projectFilter');
+            
+            if (data && data.length > 0) {
+                data.forEach(project => {
+                    const option = document.createElement('option');
+                    option.value = project.id;
+                    option.textContent = project.name;
+                    
+                    const filterOption = option.cloneNode(true);
+                    
+                    if (projectSelect) projectSelect.appendChild(option);
+                    if (projectFilter) projectFilter.appendChild(filterOption);
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao carregar projetos:', error);
+        });
 }
 </script>
 

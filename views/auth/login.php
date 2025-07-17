@@ -7,7 +7,7 @@ ob_start();
 <div class="login-container">
     <div class="login-card">
         <div class="login-header">
-            <img src="/assets/images/engenhario-logo-new.png" alt="Engenha Rio" class="logo" style="width: 200px; height: auto; display: block; margin: 0 auto 15px;">
+            <img src="/assets/images/engenhario-logo-new.png" alt="Engenha Rio" class="logo" style="width: 160px; height: auto; display: block; margin: 0 auto 20px; object-fit: contain;">
             <p>Sistema de Gestão de Documentos</p>
         </div>
         
@@ -109,13 +109,16 @@ ob_start();
     
     .login-header {
         margin-bottom: 30px;
+        padding: 10px 0;
     }
     
     .logo {
-        width: 180px;
+        width: 160px;
         height: auto;
-        margin-bottom: 15px;
-        border-radius: 10px;
+        margin-bottom: 20px;
+        border-radius: 0;
+        object-fit: contain;
+        max-width: 100%;
     }
     
     .login-header h1 {
@@ -157,18 +160,31 @@ ob_start();
         width: 100%;
         padding: 15px;
         border: none;
-        border-radius: 10px;
+        border-radius: 10px !important;
         background: #34495e;
         color: white;
         font-size: 16px;
         transition: all 0.3s ease;
         box-sizing: border-box;
+        -webkit-border-radius: 10px !important;
+        -moz-border-radius: 10px !important;
     }
     
     .input-group input:focus {
         outline: none;
         background: #3f5468;
         box-shadow: 0 0 0 2px #6c757d;
+        border-radius: 10px !important;
+    }
+    
+    /* Garantir que todos os inputs tenham bordas arredondadas */
+    input[type="email"], 
+    input[type="password"], 
+    input[type="text"] {
+        border-radius: 10px !important;
+        -webkit-border-radius: 10px !important;
+        -moz-border-radius: 10px !important;
+        -webkit-appearance: none;
     }
     
     .input-group input::placeholder {

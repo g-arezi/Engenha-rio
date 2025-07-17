@@ -130,7 +130,7 @@ class Document extends Model
      */
     public function validateDocumentData($data)
     {
-        $required = ['name', 'description', 'type', 'user_id', 'project_id'];
+        $required = ['name', 'type', 'user_id'];
         $errors = [];
         
         foreach ($required as $field) {
@@ -140,7 +140,7 @@ class Document extends Model
         }
         
         // Validar tipos permitidos
-        $allowedTypes = ['planta', 'memorial', 'estrutural', 'hidraulico', 'eletrico', 'outros'];
+        $allowedTypes = ['projeto', 'contrato', 'licenca', 'planta', 'memorial', 'estrutural', 'hidraulico', 'eletrico', 'outros'];
         if (!empty($data['type']) && !in_array($data['type'], $allowedTypes)) {
             $errors[] = 'Tipo de documento inválido';
         }
