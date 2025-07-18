@@ -76,3 +76,12 @@ Este software contém marcas d'água digitais e sistemas de rastreamento para id
 
 *Documento gerado automaticamente pelo Sistema Engenha Rio*  
 *Data: Julho 2025*
+
+---
+
+<div align="left">
+
+**Desenvolvedor: Gabriel Arezi**  
+**Portfolio:** [clique aqui](https://portifolio-beta-five-52.vercel.app/)
+
+</div>

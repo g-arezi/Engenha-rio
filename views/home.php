@@ -58,6 +58,14 @@ ob_start();
             </div>
         </div>
     </div>
+    
+    <!-- Informações do Desenvolvedor - Canto Inferior Esquerdo -->
+    <div class="developer-info">
+        <p class="mb-0">
+            <strong>Desenvolvedor:</strong> Gabriel Arezi<br>
+            <strong>Portfolio:</strong> <a href="https://portifolio-beta-five-52.vercel.app/" target="_blank" class="portfolio-link">(clique aqui)</a>
+        </p>
+    </div>
 </div>
 
 <style>
@@ -117,6 +125,49 @@ ob_start();
         background: rgba(255, 255, 255, 0.1);
         border-color: rgba(255, 255, 255, 0.5);
         color: #ffffff;
+    }
+    
+    .developer-info {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 10px 15px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        z-index: 1000;
+    }
+    
+    .developer-info p {
+        color: #ffffff;
+        font-size: 12px;
+        margin: 0;
+        line-height: 1.4;
+    }
+    
+    .portfolio-link {
+        color: #4CAF50;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.3s ease;
+    }
+    
+    .portfolio-link:hover {
+        color: #66BB6A;
+        text-decoration: underline;
+    }
+    
+    @media (max-width: 768px) {
+        .developer-info {
+            bottom: 10px;
+            left: 10px;
+            padding: 8px 12px;
+        }
+        
+        .developer-info p {
+            font-size: 11px;
+        }
     }
 </style>
 
