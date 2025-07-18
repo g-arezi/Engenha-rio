@@ -1,0 +1,136 @@
+# Arquivos de Configuração Sensíveis
+config/environment.php
+config/database.php
+config/secrets.php
+.env
+.env.local
+.env.production
+
+# Logs
+logs/*.log
+logs/temp/
+*.log
+
+# Cache e Temporários
+cache/
+temp/
+tmp/
+sessions/
+*.tmp
+*.cache
+
+# Uploads e Documentos (manter estrutura, ignorar conteúdo)
+public/documents/*
+!public/documents/.gitkeep
+uploads/*
+!uploads/.gitkeep
+
+# Banco de Dados (backup manual)
+data/backups/
+*.sql
+*.db
+*.sqlite
+
+# Dependências
+vendor/
+node_modules/
+bower_components/
+
+# IDEs e Editores
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Sistema Operacional
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# PHP
+*.php~
+.phpunit.result.cache
+phpunit.xml
+
+# Composer
+composer.phar
+composer.lock
+
+# NPM/Yarn
+package-lock.json
+yarn.lock
+
+# Arquivos de Build
+build/
+dist/
+public/build/
+public/mix-manifest.json
+
+# Arquivos de Teste
+coverage/
+.phpunit.result.cache
+tests/_output/
+tests/_data/
+tests/_support/_generated/
+
+# Backup Files
+*.bak
+*.backup
+*.old
+*.orig
+
+# Arquivos de Sistema Windows
+desktop.ini
+$RECYCLE.BIN/
+
+# Arquivos de Sistema Linux/Mac
+.bash_history
+.bashrc
+.profile
+
+# Arquivos de Documentação Local
+docs/local/
+documentation/private/
+
+# Chaves e Certificados
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+
+# Arquivos de Configuração de Servidor
+.htaccess.local
+nginx.conf.local
+apache.conf.local
+
+# Dados Sensíveis de Teste
+test-data/sensitive/
+fixtures/real-data/
+
+# Screenshots e Imagens de Debug
+screenshots/
+debug-images/
+*.png.tmp
+*.jpg.tmp
+
+# Arquivos Temporários do Sistema
+*.swp
+*.swo
+.tmp
+.temporary
+
+# Arquivos de Lock
+*.lock
+.flock
+
+# Arquivos de Profile
+profile.txt
+xdebug.prof.*
