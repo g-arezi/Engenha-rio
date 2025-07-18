@@ -1,57 +1,4 @@
 {
-    "project_002": {
-        "id": "project_002",
-        "name": "Casa Unifamiliar Moderna",
-        "description": "Projeto de casa unifamiliar com conceito moderno e sustent\u00e1vel",
-        "status": "pendente",
-        "priority": "normal",
-        "user_id": "client_001",
-        "client_id": "client_001",
-        "clients": [
-            "client_001"
-        ],
-        "analyst_id": "analyst_001",
-        "deadline": "2025-09-30",
-        "created_at": "2025-06-15 14:30:00",
-        "updated_at": "2025-07-02 09:15:00"
-    },
-    "project_003": {
-        "id": "project_003",
-        "name": "Reforma Comercial Centro",
-        "description": "Reforma completa de pr\u00e9dio comercial no centro da cidade",
-        "status": "aprovado",
-        "priority": "normal",
-        "user_id": "client_001",
-        "analyst_id": "analyst_001",
-        "deadline": "2025-07-20",
-        "created_at": "2025-05-10 11:45:00",
-        "updated_at": "2025-07-03 16:22:00"
-    },
-    "project_004": {
-        "id": "project_004",
-        "name": "Complexo Industrial",
-        "description": "Projeto de complexo industrial para empresa de log\u00edstica",
-        "status": "atrasado",
-        "priority": "alta",
-        "user_id": "client_001",
-        "analyst_id": "analyst_001",
-        "deadline": "2025-06-30",
-        "created_at": "2025-04-20 08:20:00",
-        "updated_at": "2025-07-01 12:10:00"
-    },
-    "6877d2c565353": {
-        "name": "Projeto Inova",
-        "description": "teste projeto inova",
-        "deadline": "2025-07-31",
-        "user_id": "admin_002",
-        "client_id": "686c14c547d77",
-        "analyst_id": "686856ad9c7f8",
-        "status": "aguardando",
-        "priority": "normal",
-        "created_at": "2025-07-16 13:26:45",
-        "updated_at": "2025-07-16 13:26:45",
-        "id": "6877d2c565353"
-    },
     "68780d9cb2343": {
         "name": "Projeto Inova2",
         "description": "projeto de testes",
@@ -66,21 +13,6 @@
         "created_at": "2025-07-16 17:37:48",
         "updated_at": "2025-07-16 17:37:48",
         "id": "68780d9cb2343"
-    },
-    "68793ce59b9a3": {
-        "name": "velocity ",
-        "description": "projeto ppci para LE",
-        "deadline": "2025-07-24",
-        "user_id": "686856ad9c7f8",
-        "client_id": "68792ec48a719",
-        "analyst_id": "686856ad9c7f8",
-        "project_type": "comercial",
-        "document_template_id": "template_002",
-        "status": "aguardando",
-        "priority": "normal",
-        "created_at": "2025-07-17 15:11:49",
-        "updated_at": "2025-07-17 15:11:49",
-        "id": "68793ce59b9a3"
     },
     "68793d544d33c": {
         "name": "TESTE",
