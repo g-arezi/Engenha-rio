@@ -1,5 +1,17 @@
 <?php
 /**
+ * Sistema de Gestão de Projetos - Engenha Rio
+ * 
+ * © 2025 Engenha Rio - Todos os direitos reservados
+ * Desenvolvido por: Gabriel Arezi
+ * Portfolio: https://portifolio-beta-five-52.vercel.app/
+ * GitHub: https://github.com/g-arezi
+ * 
+ * Este software é propriedade intelectual protegida.
+ * Uso não autorizado será processado judicialmente.
+ */
+
+/**
  * Sistema de Log Personalizado para Engenha Rio
  * Funciona independente das configurações de error_log do servidor
  */

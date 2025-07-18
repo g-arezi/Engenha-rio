@@ -1,4 +1,12 @@
 @echo off
+REM Sistema de Gestão de Projetos - Engenha Rio
+REM © 2025 Engenha Rio - Todos os direitos reservados
+REM Desenvolvido por: Gabriel Arezi
+REM Portfolio: https://portifolio-beta-five-52.vercel.app/
+REM GitHub: https://github.com/g-arezi
+REM Este software é propriedade intelectual protegida.
+REM Uso não autorizado será processado judicialmente.
+
 echo =====================================================
 echo     🚀 ENGENHA RIO - SERVIDOR LOCAL
 echo =====================================================

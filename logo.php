@@ -1,4 +1,16 @@
 <?php
+/**
+ * Sistema de Gestão de Projetos - Engenha Rio
+ * 
+ * © 2025 Engenha Rio - Todos os direitos reservados
+ * Desenvolvido por: Gabriel Arezi
+ * Portfolio: https://portifolio-beta-five-52.vercel.app/
+ * GitHub: https://github.com/g-arezi
+ * 
+ * Este software é propriedade intelectual protegida.
+ * Uso não autorizado será processado judicialmente.
+ */
+
 // Servir nova logo diretamente
 $paths = [
     __DIR__ . '/public/assets/images/engenhario-logo-new.png',
