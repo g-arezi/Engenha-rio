@@ -367,17 +367,6 @@ tar -czf backup_$DATE.tar.gz data/ public/documents/ logs/
 - Comentários em português
 - Testes para novas funcionalidades
 
-## 📞 Suporte
-
-### **Documentação**
-- [Wiki do Projeto](docs/)
-- [API Reference](docs/api/)
-- [Guia do Usuário](docs/user-guide/)
-
-### **Contato**
-- 📧 Email: [email protegido]
-- 🐛 Issues: [GitHub Issues](https://github.com/[username]/engenha-rio/issues)
-- 💬 Discussões: [GitHub Discussions](https://github.com/[username]/engenha-rio/discussions)
 
 ## 📜 Licença e Termos de Uso
 
@@ -409,9 +398,7 @@ Este software é **propriedade intelectual exclusiva da Engenha Rio** e está pr
 ### 📞 **Contato Legal**
 
 Para questões relacionadas a direitos autorais:
-- 📧 **Email**: juridico@engenha-rio.com
-- 📞 **Telefone**: [protegido]
-- 🏢 **Endereço**: [protegido]
+- 📧 **Email**: contato.gsaa@outlook.com
 
 ---
 
@@ -442,7 +429,6 @@ Para questões relacionadas a direitos autorais:
 
 <div align="center">
 
-**© 2025 Engenha Rio - Todos os Direitos Reservados**
 
 **⚠️ PROPRIEDADE INTELECTUAL PROTEGIDA ⚠️**
 
